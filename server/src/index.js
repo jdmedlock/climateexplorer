@@ -1,28 +1,16 @@
-// require('dotenv').config();
+import { ApolloServer } from 'apollo-server';
+import typeDefs from './schema';
 
-const { ApolloServer } = require('apollo-server');
-
-const typeDefs = require('./schema');
-const resolvers = require('./resolvers');
-
-// set up any dataSources our resolvers need
-const dataSources = () => ({
-});
-
-// the function that sets up the global context for each resolver, using the req
-const context = async ({ req }) => {
-  return true;
+// Temporary data for initial testing
+const user = {
+  id: '1',
+  name: 'Jim',
 };
 
-// Set up Apollo Server
-const server = new ApolloServer({
+
+const server = new ApolloServer({ 
   typeDefs,
-  resolvers,
-  dataSources,
-  context,
-  engine: {
-    apiKey: process.env.ENGINE_API_KEY,
-  },
+  context: {user}
 });
 
 // Start our server if we're not in a test env.
@@ -31,16 +19,3 @@ if (process.env.NODE_ENV !== 'test')
   server
     .listen({ port: 4000 })
     .then(({ url }) => console.log(`🚀 app running at ${url}`));
-
-// export all the important pieces for integration/e2e tests to use
-module.exports = {
-  dataSources,
-  context,
-  typeDefs,
-  resolvers,
-  ApolloServer,
-  LaunchAPI,
-  UserAPI,
-  store,
-  server,
-};
