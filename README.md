@@ -1,18 +1,18 @@
-# Meteorite - Explore meteorite strikes
-[Meteorite App](https://jdmedlock.github.io/climateexplorer/)
+# Climate Explorer - Explore Global Climatology Data
+[Climate Explorer](https://jdmedlock.github.io/climateexplorer/)
 <br/>
 
-[![meteorite last commit](https://img.shields.io/github/last-commit/google/skia.svg)](https://github.com/jdmedlock/climateexplorer)
+[![climateexplorer last commit](https://img.shields.io/github/last-commit/google/skia.svg)](https://github.com/jdmedlock/climateexplorer)
 <br/>
 [![Packagist](https://img.shields.io/packagist/l/doctrine/orm.svg)](https://github.com/jdmedlock/climateexplorer/)
 
 
-![Screenshot](https://github.com/jdmedlock/climateexplorer/blob/development/docs/me_screenshot.png)
+![Screenshot](https://github.com/jdmedlock/climateexplorer/blob/development/docs/ce_screenshot.png)
 
 ## Table of Contents
 
 * [Overview](#overview)
-* [Usage](#usage)
+* [API](#usage)
 * [Dependencies](#dependencies)
 * [Application Structure](#application-structure)
 * [FAQ](#frequently-asked-questions)
@@ -25,7 +25,7 @@
 
 TD
 
-## Usage
+## API
 
 ### UI Features
 
