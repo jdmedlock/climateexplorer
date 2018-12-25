@@ -98,4 +98,4 @@ site contains the detailed data about meteorite landings required by this app.
 The component structure of the Meteorite Explorer application is shown in the
 following diagram.
 
-![React Component Structure](https://github.com/jdmedlock/climateexplorer/blob/development/docs/me_component_structure.png)
+![React Component Structure](https://github.com/jdmedlock/climateexplorer/blob/development/docs/ce_component_structure.png)
