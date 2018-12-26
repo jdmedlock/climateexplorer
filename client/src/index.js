@@ -8,8 +8,6 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-import { me } from './queries/me';
-
 const cache = new InMemoryCache();
 const link = new HttpLink({
   uri: 'http://localhost:4000/graphql',
@@ -18,10 +16,6 @@ const client = new ApolloClient({
   cache,
   link,
 });
-
-// Temporary test of query function
-me(client)
-.then(result => console.log('name: ', result.data.me.name));
 
 ReactDOM.render(
   <ApolloProvider client={client}>
