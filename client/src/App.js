@@ -1,25 +1,46 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
 
+import './App.css';
+import GlobalErrorBoundary from './components/GlobalErrorBoundary';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import { createMuiTheme } from '@material-ui/core/styles';
+import TopBar from './components/TopBar';
+import UnderConstruction from './components/UnderConstruction';
+import BottomBar from './components/BottomBar';
+  
 class App extends Component {
-  render() {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+    };
+  }
+
+  render = () => {
+    const theme = createMuiTheme({
+      typography: {
+        useNextVariants: true
+      }
+    });
+
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <GlobalErrorBoundary>
+          <MuiThemeProvider theme={theme}>
+            <header className="App-header">
+              <TopBar title="Climate Explorer"/>
+            </header>
+
+            <section className="App-results">
+              <UnderConstruction />
+            </section>
+
+            <footer className="App-footer">
+              <BottomBar title="Data courtesy U.S. National Oceanographic and Atmospheric Administration (NOAA)"
+                href={ process.env.REACT_APP_NOAA_HOMEPAGE } />
+            </footer>
+          </MuiThemeProvider>
+        </GlobalErrorBoundary>
       </div>
     );
   }
