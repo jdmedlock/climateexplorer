@@ -8,27 +8,20 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-import gql from "graphql-tag";
+import { me } from './queries/me';
 
 const cache = new InMemoryCache();
+const link = new HttpLink({
+  uri: 'http://localhost:4000/graphql',
+});
 const client = new ApolloClient({
   cache,
-  link: new HttpLink({
-    uri: 'http://localhost:4000/graphql',
-  }),
+  link,
 });
 
-// Simple test of cql
-client.query({
-  query: gql`
-    query {
-      me {
-        id
-        name
-      }
-    }`
-})
-.then(result => console.log(`id: ${result.data.me.id} name:${result.data.me.name}`));
+// Temporary test of query function
+me(client)
+.then(result => console.log('name: ', result.data.me.name));
 
 ReactDOM.render(
   <ApolloProvider client={client}>
