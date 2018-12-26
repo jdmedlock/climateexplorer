@@ -8,18 +8,27 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+import gql from "graphql-tag";
+
 const cache = new InMemoryCache();
 const client = new ApolloClient({
   cache,
   link: new HttpLink({
     uri: 'http://localhost:4000/graphql',
-    headers: {
-      authorization: localStorage.getItem('token'),
-      'client-name': 'Climate Explorer [web]',
-      'client-version': '1.0.0',
-    },
   }),
 });
+
+// Simple test of cql
+client.query({
+  query: gql`
+    query {
+      me {
+        id
+        name
+      }
+    }`
+})
+.then(result => console.log(`id: ${result.data.me.id} name:${result.data.me.name}`));
 
 ReactDOM.render(
   <ApolloProvider client={client}>
