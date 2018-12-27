@@ -6,6 +6,9 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
+import Button from './CEButton';
+import Login from './Login';
+
 const styles = {
   root: {
     flexGrow: 1,
@@ -16,22 +19,36 @@ const styles = {
   },
 };
 
-const TopBar = (props) => {
-  const { title, classes } = props;
-  return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h4" color="inherit" className={classes.grow}>
-          {title}
-        </Typography>
-      </Toolbar>
-    </AppBar>
-  );
-}
+class  TopBar extends React.Component {
 
-TopBar.propTypes = {
-  title: PropTypes.string,
-  classes: PropTypes.object.isRequired,
+  static propTypes = {
+    title: PropTypes.string,
+    classes: PropTypes.object.isRequired,
+  };
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      
+    };
+  }
+
+  render = () => {
+    const { title, classes } = this.props;
+    return (
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h4" color="inherit" className={classes.grow}>
+            {title}
+          </Typography>
+          <Button name="Login" clickHandler={ null } />
+        </Toolbar>
+      </AppBar>
+    );
+  }
 };
+
+
 
 export default withStyles(styles)(TopBar);
