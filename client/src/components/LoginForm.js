@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import debounce from "lodash.debounce";
-import IsEmail from 'isemail';
+import isEmail from 'isemail';
 
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
@@ -44,7 +44,7 @@ class LoginForm extends Component {
 
   loginClickHandler = () => {
     let emailErrorText = '';
-    if (IsEmail.validate(this.state.emailAddress)) {
+    if (isEmail.validate(this.state.emailAddress)) {
       emailErrorText = '';
       this.props.login({ variables: { email: this.state.email } });
     } else {
