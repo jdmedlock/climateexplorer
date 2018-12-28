@@ -14,8 +14,8 @@ const styles = theme => ({
 const CEButton = (props) => {
   const { classes, name, clickHandler } = props;
   return (
-    <Button variant="contained" className={classes.button} onClick={clickHandler} >
-      {name}
+    <Button variant="contained" className={ classes.button } onClick={ clickHandler } >
+      { name }
     </Button>
   );
 }

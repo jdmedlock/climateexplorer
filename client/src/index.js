@@ -2,10 +2,13 @@ import { ApolloClient } from "apollo-client";
 import { ApolloProvider } from 'react-apollo';
 import { HttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import './index.css';
 import App from './App';
+import { resolvers, typeDefs } from './graphql/resolvers';
 import * as serviceWorker from './serviceWorker';
 
 const cache = new InMemoryCache();
@@ -15,6 +18,11 @@ const link = new HttpLink({
 const client = new ApolloClient({
   cache,
   link,
+  initializers: {
+    isLoggedIn: () => !!localStorage.getItem('token'),
+  },
+  resolvers,
+  typeDefs
 });
 
 ReactDOM.render(

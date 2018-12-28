@@ -1,59 +1,32 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { ApolloConsumer, Mutation } from 'react-apollo';
 
-import { withStyles } from '@material-ui/core/styles';
-import Input from '@material-ui/core/Input';
+import LoginForm from './LoginForm';
+import { LOGIN_USER } from '../graphql/mutations';
 
-const styles = theme => ({
-  container: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-  input: {
-    margin: theme.spacing.unit,
-  },
-});
-
-function Inputs(props) {
-  const { classes } = props;
+const Login = (props) => {
   return (
-    <div className={classes.container}>
-      <Input
-        defaultValue="Hello world"
-        className={classes.input}
-        inputProps={{
-          'aria-label': 'Description',
-        }}
-      />
-      <Input
-        placeholder="Placeholder"
-        className={classes.input}
-        inputProps={{
-          'aria-label': 'Description',
-        }}
-      />
-      <Input
-        value="Disabled"
-        className={classes.input}
-        disabled
-        inputProps={{
-          'aria-label': 'Description',
-        }}
-      />
-      <Input
-        defaultValue="Error"
-        className={classes.input}
-        error
-        inputProps={{
-          'aria-label': 'Description',
-        }}
-      />
-    </div>
+    <ApolloConsumer>
+      {client => (
+        <Mutation
+          mutation={ LOGIN_USER }
+          onCompleted={({ login }) => {
+            localStorage.setItem('token', login);
+            client.writeData({ data: { isLoggedIn: true } });
+          }}
+        >
+          {(login, { loading, error }) => {
+            // this loading state will probably never show, but it's helpful to
+            // have for testing
+            if (loading) return <p>Loading...</p>;
+            if (error) return <p>An error occurred</p>;
+
+            return <LoginForm login={login} />;
+          }}
+        </Mutation>
+      )}
+    </ApolloConsumer>
   );
 }
 
-Inputs.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(Inputs);
+export default Login;

@@ -7,14 +7,26 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import TopBar from './components/TopBar';
 import UnderConstruction from './components/UnderConstruction';
 import BottomBar from './components/BottomBar';
+
+import Login from './components/Login';
   
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      
+      getLoginEmail: false,
     };
+  }
+
+  loginClickHandler = () => {
+    this.setState({ getLoginEmail: true });
+  }
+
+  setLoginEmail = (loginEmail) => {
+    this.setState({
+      getLoginEmail: false,
+    });
   }
 
   render = () => {
@@ -27,13 +39,18 @@ class App extends Component {
     return (
       <div className="App">
         <GlobalErrorBoundary>
-          <MuiThemeProvider theme={theme}>
+          <MuiThemeProvider theme={ theme }>
             <header className="App-header">
-              <TopBar title="Climate Explorer"/>
+              <TopBar title="Climate Explorer" loginClickHandler={ this.loginClickHandler } />
             </header>
 
             <section className="App-results">
-              <UnderConstruction />
+              <div>
+                {this.state.getLoginEmail
+                  ? <Login />
+                  : <UnderConstruction />
+                }
+              </div>
             </section>
 
             <footer className="App-footer">

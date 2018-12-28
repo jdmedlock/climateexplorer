@@ -6,8 +6,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
-import Button from './CEButton';
-import Login from './Login';
+import CEButton from './CEButton';
 
 const styles = {
   root: {
@@ -22,8 +21,9 @@ const styles = {
 class  TopBar extends React.Component {
 
   static propTypes = {
-    title: PropTypes.string,
     classes: PropTypes.object.isRequired,
+    title: PropTypes.string.isRequired,
+    loginClickHandler: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -35,14 +35,14 @@ class  TopBar extends React.Component {
   }
 
   render = () => {
-    const { title, classes } = this.props;
+    const { classes, title, loginClickHandler } = this.props;
     return (
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h4" color="inherit" className={classes.grow}>
             {title}
           </Typography>
-          <Button name="Login" clickHandler={ null } />
+          <CEButton name="Login" clickHandler={ loginClickHandler } />
         </Toolbar>
       </AppBar>
     );
