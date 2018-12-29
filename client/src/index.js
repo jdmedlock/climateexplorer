@@ -12,19 +12,19 @@ import { resolvers, typeDefs } from './graphql/resolvers';
 import * as serviceWorker from './serviceWorker';
 
 const cache = new InMemoryCache();
-const link = new HttpLink({
-  uri: 'http://localhost:4000/graphql',
-  headers: {
-    authorization: localStorage.getItem('token'),
-    'client-name': 'Climate Explorer',
-    'client-version': '1.0.0',
-  },
-});
+const token = localStorage.getItem('token');
 const client = new ApolloClient({
   cache,
-  link,
+  link: new HttpLink({
+    uri: 'http://localhost:4000/graphql',
+    headers: {
+      authorization: token ? token : "",
+      'client-name': 'Climate Explorer',
+      'client-version': '1.0.0',
+    },
+  }),
   initializers: {
-    isLoggedIn: () => !!localStorage.getItem('token'),
+    isLoggedIn: () => !!token,
   },
   resolvers,
   typeDefs

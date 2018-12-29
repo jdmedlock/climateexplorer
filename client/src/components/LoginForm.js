@@ -43,14 +43,14 @@ class LoginForm extends Component {
   }
 
   loginClickHandler = () => {
-    let emailErrorText = '';
+    let errorText = '';
     if (isEmail.validate(this.state.emailAddress)) {
-      emailErrorText = '';
-      this.props.login({ variables: { email: this.state.email } });
+      errorText = '';
+      this.props.login({ variables: { email: this.state.emailAddress } });
     } else {
-      emailErrorText = 'Invalid email address entered';
+      errorText = 'Invalid email address entered';
     }
-    this.setState({ emailErrorText: emailErrorText });
+    this.setState({ emailErrorText: errorText });
   }
 
   emailChangeHandler = (event) => {
