@@ -39,7 +39,7 @@ class UserAPI extends DataSource {
       return null;
     }
     const user = this.users.find(user => user.email === email);
-    return user.name;
+    return user;
   }
 
 }

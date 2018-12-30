@@ -28,7 +28,7 @@ const context = async ({ req }) => {
   // This would normally be via a profile lookup in the db, but for now
   // we're using temporary data for testing.
   const user = dataSources.userAPI.findUserByEmail(email);
-  console.log('user: ', user);
+  console.log('user: ', user.email);
   return { user: { user } };
 };
 
