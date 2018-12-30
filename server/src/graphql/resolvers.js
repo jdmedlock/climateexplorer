@@ -5,7 +5,8 @@ module.exports = {
   },
   Mutation: {
     login: async (_, { email }, { dataSources }) => {
-      return null;
+      const user = dataSources.userAPI.findUserByEmail(email);
+      return user;
     },
   },
 };

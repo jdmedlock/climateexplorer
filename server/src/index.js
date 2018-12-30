@@ -1,30 +1,25 @@
 import { ApolloServer } from 'apollo-server';
-import typeDefs from './schema';
-import resolvers from './resolvers.js';
+
+import isEmail from 'isemail';
+import typeDefs from './graphql/schema';
+import resolvers from './graphql/resolvers.js';
+
+import UserAPI from './datasources/user';
 
 // Data sources required by the resolvers
 const dataSources = () => ({
-  // Temporary data for initial testing
-  user: {
-    id: '1',
-    name: 'Joe User',
-    email: 'joe@gmail.com'
-  },
-  user: {
-    id: '2',
-    name: 'Jane Doe',
-    email: 'jane@gmail.com'
-  }
+  userAPI: new UserAPI(),
 });
 
 // Create the context that will be shared across all resolvers
 const context = async ({ req }) => {
   // Check for proper authorization on every request
   const auth = (req.headers && req.headers.authorization) || '';
-  const email = Buffer.from(auth, 'base64').toString('ascii');
+  const email = new Buffer(auth, 'base64').toString('ascii');
   console.log('email: ', email);
   console.log('auth: ', auth);
   console.log('req.headers: ', req.headers);
+  console.log('req.body: ', req.body);
   if (!isEmail.validate(email)) {
     return { user: null };
   }
@@ -32,13 +27,9 @@ const context = async ({ req }) => {
   // Locate the user based on their email address.
   // This would normally be via a profile lookup in the db, but for now
   // we're using temporary data for testing.
-  let user = dataSources.find((user) => {
-    return user.email === email;
-  });
-  user = users && users[0] ? users[0] : null;
+  const user = dataSources.userAPI.findUserByEmail(email);
   console.log('user: ', user);
-
-  return { user };
+  return { user: { user } };
 };
 
 // Create and start the Apollo Server

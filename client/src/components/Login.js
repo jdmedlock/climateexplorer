@@ -20,9 +20,12 @@ const Login = (props) => {
           }}
         >
           {(login, { loading, error }) => {
-            if (loading) return <p>Loading...</p>;
-            if (error) return <p>An error occurred</p>;
-
+            if (loading) {
+              return <p>Loading...</p>;
+            }
+            if (error) {
+              return <p>An error occurred</p>;
+            }
             return <LoginForm login={login} />;
           }}
         </Mutation>
