@@ -38,8 +38,6 @@ class App extends Component {
         useNextVariants: true
       }
     });
-
-    console.log('IS_LOGGED_IN: ', IS_LOGGED_IN);
     
     return (
       <div className="App">
