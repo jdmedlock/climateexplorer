@@ -15,11 +15,7 @@ const dataSources = () => ({
 const context = async ({ req }) => {
   // Check for proper authorization on every request
   const auth = (req.headers && req.headers.authorization) || '';
-  const email = new Buffer(auth, 'base64').toString('ascii');
-  console.log('email: ', email);
-  console.log('auth: ', auth);
-  console.log('req.headers: ', req.headers);
-  console.log('req.body: ', req.body);
+  const email = Buffer.from(auth, 'base64').toString('ascii');
   if (!isEmail.validate(email)) {
     return { user: null };
   }
@@ -28,7 +24,6 @@ const context = async ({ req }) => {
   // This would normally be via a profile lookup in the db, but for now
   // we're using temporary data for testing.
   const user = dataSources.userAPI.findUserByEmail(email);
-  console.log('user: ', user.email);
   return { user: { user } };
 };
 

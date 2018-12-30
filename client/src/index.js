@@ -24,7 +24,7 @@ const client = new ApolloClient({
     },
   }),
   initializers: {
-    isLoggedIn: () => !!token,
+    isLoggedIn: () => false,
   },
   resolvers,
   typeDefs

@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
 
+import { Query } from 'react-apollo';
+import { IS_LOGGED_IN } from './graphql/queries';
+
 import './App.css';
 import GlobalErrorBoundary from './components/GlobalErrorBoundary';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { createMuiTheme } from '@material-ui/core/styles';
 import TopBar from './components/TopBar';
+import Login from './components/Login';
 import UnderConstruction from './components/UnderConstruction';
 import BottomBar from './components/BottomBar';
 
-import Login from './components/Login';
   
 class App extends Component {
   constructor(props) {
@@ -36,6 +39,8 @@ class App extends Component {
       }
     });
 
+    console.log('IS_LOGGED_IN: ', IS_LOGGED_IN);
+    
     return (
       <div className="App">
         <GlobalErrorBoundary>
@@ -45,12 +50,12 @@ class App extends Component {
             </header>
 
             <section className="App-results">
-              <div>
-                {this.state.getLoginEmail
-                  ? <Login />
-                  : <UnderConstruction />
-                }
-              </div>
+              <Query query={ IS_LOGGED_IN }>
+                {({ data, loading, error }) => {
+                  console.log('error: ', error);
+                  return (data.isLoggedIn ? <UnderConstruction /> : <Login />);
+                }}
+              </Query>
             </section>
 
             <footer className="App-footer">
