@@ -14,24 +14,29 @@
 * [Overview](#overview)
 * [API](#api)
 * [Dependencies](#dependencies)
-* [Application Structure](#application-structure)
-
+* [Server Architecture](#serve-architecture)
 
 ## Overview
 
-TD
+The Climate Explorer application backend utilizes Apollo GraphQL to provide 
+access to data and services required by the frontend application.
 
 ## API
 
-### UI Features
+The API is based on Apollo GraphQL and makes the following queries and
+mutations available to the frontend application.
 
-TBD
+| Type     | Name        | Description     |
+|:---------|:------------|:----------------|
+| Query    | user(email) | Retrieves a specific user given an email address |
+| Mutation | login(email) | Retrieves a login token for the user with the specified email address |
+
 
 ### Starting & Building the App
 
 To start the application in development mode simply run `npm run start`from
 the command line. The application will automatically open a new tab in your
-browser with the url `localhost:3000`.
+browser with the url `localhost:4000`.
 
 To start the application in production mode run `npm run serve`
 from the command line. In production mode the app will automatically create a
@@ -51,18 +56,15 @@ take effect.
 
 Environment variables maintained in the `.env` file are made available to the
 application code via `process.env.<variable-name>`. For example, the
-homepage for the meteorite landings data is accessed in the code by referencing
-`process.env.REACT_APP_METEORITE_LANDING_HOMEPAGE`.
+homepage for the NOAA site is accessed in the code by referencing
+`process.env.NOAA_HOMEPAGE`.
 
 Remember that even though this keeps secure tokens like client id's and secrets
 out of application code it does not make them secure.
 
 | Environment Variable    | Description | Example Setting |
 |:------------------------|:------------|:----------------|
-| REACT_APP_METEORITE_LANDING_HOMEPAGE | Nasa Meteorite Landing homepage | N/a |
-| REACT_APP_METEORITE_STRIKE_DATASET | URL for JSON dataset | N/a |
-| REACT_APP_GITHUB_REPO | GitHub repo issues will be added to | N/a |
-| REACT_APP_GITHUB_ACCESS_TOKEN | Token for GitHub repo authentication | N/a |
+| TBD                     | TBD         | TBD             |
 
 ## Dependencies
 
@@ -72,30 +74,24 @@ This app has the following dependencies
 
 | Module/Library | Environment | Description | Related Files |
 |:---------------|:------------|:------------|:--------------|
-| @material-ui/core | Development | Material Design React components | N/a |
-| @material-ui/icons | Development | Material Design React components | N/a |
-| gh-pages | Runtiime | Publish to GitHub Pages | N/a |
-| github-create-issue | Runtime | Create GitHub Issues | N/a |
-| lodash.debounce | Runtime    | _debounce text input | N/a  |
-| prop-types     | Runtime     | Type checking for props | N/a |
-| react          | Runtime     | UI Library  | N/a           |
-| react-dom      | Runtime     | DOM renderer for React | N/a |
-| react-scripts  | Runtime     | scripts and configuration used by Create React App | N/a |
-
-In addition to these libraries, which the app explicitly depends on,
-Create React App includes other libraries such as Babel and Webpack. For more
-information about Create React App and it's dependencies consult its
-[documentation](https://github.com/facebook/create-react-app).
+| apollo         | Developmenbt | Apollo CLI  | N/a |
+| apollo-datasource | Runtime  | - | N/a |
+| apollo-link    | Runtime     | GraphQL Transport Layer | N/a |
+| apollo-link-http | Runtime   | GraphQL HTTP Transport | N/a |
+| apollo-server  | Runtime     | GraphQL Server | N/a |
+| babel-plugin-transform-object-rest-spread | Development | Babel plugin | `.babelrc` |
+| babel-preset-env | Development | Babel ES6 presets | `.babelrc` |
+| dotenv         | Runtime     | Environment variables | `.env` |
+| graphql        | Runtime     | GraphQL Reference implementation | N/a |
+| isemail        | Runtime     | Email address validator | N/a |
+| nodemon        | Development | NodeJS Monitor | `package.json` scripts |
 
 ### External Dependencies
 
-In addition to libraries Meteorite Explorer also depends on webservices to
-provide with details about places. The [Meteorite Landing dataset](https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh)
-site contains the detailed data about meteorite landings required by this app.
+N/a
 
-## Application Structure
+## Server Architecture
 
-The component structure of the Meteorite Explorer application is shown in the
-following diagram.
+The architecture of the server is shown in the following diagram.
 
-![React Component Structure](https://github.com/jdmedlock/climateexplorer/blob/development/docs/ce_component_structure.png)
+![React Component Structure](https://github.com/jdmedlock/climateexplorer/blob/development/docs/ce_server_architecture.png)

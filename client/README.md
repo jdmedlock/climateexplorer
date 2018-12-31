@@ -18,7 +18,9 @@
 
 ## Overview
 
-TD
+The Climate Explorer application frontend utilizes React for its user
+interface and Apollo GraphQL for both local state management as well as
+for accessing services provided by the backend server.
 
 ## Usage
 
@@ -28,7 +30,7 @@ TBD
 
 ### Starting & Building the App
 
-To start the application in development mode simply run `npm run start`from
+To start the application in development mode simply run `npm start`from
 the command line. The application will automatically open a new tab in your
 browser with the url `localhost:3000`.
 
@@ -37,8 +39,6 @@ from the command line. In production mode the app will automatically create a
 new browser tab with the url `localhost:5000`. The main difference between
 production and development modes is a Service Worker runs in productin mode to
 support offline execution.
-
-The production version of the app on GitHub Pages is built by running `npm run publish`.
 
 ### Environment Variables
 
@@ -50,18 +50,15 @@ take effect.
 
 Environment variables maintained in the `.env` file are made available to the
 application code via `process.env.<variable-name>`. For example, the
-homepage for the meteorite landings data is accessed in the code by referencing
-`process.env.REACT_APP_METEORITE_LANDING_HOMEPAGE`.
+homepage for the NOAA site is accessed in the code by referencing
+`process.env.REACT_APP_NOAA_HOMEPAGE`.
 
 Remember that even though this keeps secure tokens like client id's and secrets
 out of application code it does not make them secure.
 
 | Environment Variable    | Description | Example Setting |
 |:------------------------|:------------|:----------------|
-| REACT_APP_METEORITE_LANDING_HOMEPAGE | Nasa Meteorite Landing homepage | N/a |
-| REACT_APP_METEORITE_STRIKE_DATASET | URL for JSON dataset | N/a |
-| REACT_APP_GITHUB_REPO | GitHub repo issues will be added to | N/a |
-| REACT_APP_GITHUB_ACCESS_TOKEN | Token for GitHub repo authentication | N/a |
+| REACT_APP_NOAA_HOMEPAGE | NOAA homepage | N/a |
 
 ## Dependencies
 
@@ -73,11 +70,15 @@ This app has the following dependencies
 |:---------------|:------------|:------------|:--------------|
 | @material-ui/core | Development | Material Design React components | N/a |
 | @material-ui/icons | Development | Material Design React components | N/a |
-| gh-pages | Runtiime | Publish to GitHub Pages | N/a |
-| github-create-issue | Runtime | Create GitHub Issues | N/a |
+| apollo         | Runtime     | Apollo GraphQL | N/a |
+| apollo-boost   | Runtime     | [Apollo Boost](https://www.npmjs.com/package/apollo-boost) | Includes multiple Apollo packages |
+| apollo-react   | Runtime     | Apollo React Components | N/a |
+| graphql        | Runtime     | GraphQL Reference implementation | N/a |
+| isemail        | Runtime     | Email address validator | N/a |
 | lodash.debounce | Runtime    | _debounce text input | N/a  |
 | prop-types     | Runtime     | Type checking for props | N/a |
 | react          | Runtime     | UI Library  | N/a           |
+| react-apollo   | Runtime     | Apollo React Components | N/a |
 | react-dom      | Runtime     | DOM renderer for React | N/a |
 | react-scripts  | Runtime     | scripts and configuration used by Create React App | N/a |
 
