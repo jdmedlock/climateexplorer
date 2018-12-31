@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -21,22 +22,24 @@ const styles = {
   title: {
     fontSize: "3rem",
   },
+  subtitle: {
+    fontSize: "1.5rem",
+  }
 };
 
 const UnderConstruction = (props) => {
-  const { classes } = props;
   return (
-    <Paper className={classes.root}>
-      <Card className={classes.card}>
-        <CardContent>
-          <Typography className={classes.title} color="textSecondary" gutterBottom>
-            Under Construction!
-          </Typography>
-        </CardContent>
-      </Card>
-    </Paper>
+    <Paper className={props.classes.root}>
+    <Card className={props.classes.card}>
+      <CardContent>
+        <Typography className={props.classes.title} color="textSecondary" gutterBottom>
+          Under Construction!
+        </Typography>
+      </CardContent>
+    </Card>
+  </Paper>
   );
-}
+};
 
 UnderConstruction.propTypes = {
   title: PropTypes.string,

@@ -20,7 +20,7 @@ const styles = {
 };
 
 const BottomBar = (props) => {
-  const { title, href, classes } = props;
+  const { classes, title, href } = props;
   return (
     <AppBar position="static">
       <Toolbar>
@@ -35,9 +35,9 @@ const BottomBar = (props) => {
 }
 
 BottomBar.propTypes = {
+  classes: PropTypes.object.isRequired,
   title: PropTypes.string,
   href: PropTypes.string,
-  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(BottomBar);
