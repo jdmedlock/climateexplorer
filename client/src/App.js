@@ -38,7 +38,7 @@ class App extends Component {
         useNextVariants: true
       }
     });
-    
+
     return (
       <div className="App">
         <GlobalErrorBoundary>
@@ -50,7 +50,6 @@ class App extends Component {
             <section className="App-results">
               <Query query={ IS_LOGGED_IN }>
                 {({ data, loading, error }) => {
-                  console.log('error: ', error);
                   return (data.isLoggedIn ? <UnderConstruction /> : <Login />);
                 }}
               </Query>

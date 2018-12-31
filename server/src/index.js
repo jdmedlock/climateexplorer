@@ -6,9 +6,11 @@ import resolvers from './graphql/resolvers.js';
 
 import UserAPI from './datasources/user';
 
-// Data sources required by the resolvers
+// Data sources required by the resolvers. Note that userAPI is instantiated
+// outside of dataSources so it will be available within the context.
+const userAPI = new UserAPI();
 const dataSources = () => ({
-  userAPI: new UserAPI(),
+  userAPI: userAPI,
 });
 
 // Create the context that will be shared across all resolvers
@@ -23,7 +25,7 @@ const context = async ({ req }) => {
   // Locate the user based on their email address.
   // This would normally be via a profile lookup in the db, but for now
   // we're using temporary data for testing.
-  const user = dataSources.userAPI.findUserByEmail(email);
+  const user = userAPI.findUserByEmail(email);
   return { user: { user } };
 };
 
