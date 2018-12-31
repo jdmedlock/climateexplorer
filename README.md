@@ -57,7 +57,7 @@ directory to start the backend.
 The architecture of the Climate Explorer application is shown in the
 following diagram.
 
-![React Component Structure](https://github.com/jdmedlock/climateexplorer/blob/development/docs/ce_architecture.png)
+![Climate Explorer Architecture](https://github.com/jdmedlock/climateexplorer/blob/development/docs/ce_architecture.png)
 
 ## Frequently Asked Questions
 
