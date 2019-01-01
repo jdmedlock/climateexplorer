@@ -59,6 +59,12 @@ following diagram.
 
 ![Climate Explorer Architecture](https://github.com/jdmedlock/climateexplorer/blob/development/docs/ce_architecture.png)
 
+Documentation on the frontend and backend parts of the application are
+located at the following locations:
+
+- [Frontend Client](https://github.com/jdmedlock/climateexplorer/blob/development/client/README.md)
+- [Backend Server](https://github.com/jdmedlock/climateexplorer/blob/development/server/README.md)
+
 ## Frequently Asked Questions
 
 TBD
