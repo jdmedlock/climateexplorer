@@ -41,8 +41,8 @@ class User extends DataSource {
       return null;
     }
 
-    const user = await this.mongo.findOne('users', email);
-    console.log('findUserByEmail - user: ', user);
+    const user = await this.mongo.findOne('users', { email: email });
+    process.env.NODE_ENV === 'production' ? null : console.log('findUserByEmail - user: ', user);
     return user;
   }
 
