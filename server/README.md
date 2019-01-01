@@ -46,13 +46,17 @@ support offline execution.
 
 The production version of the app on GitHub Pages is built by running `npm run publish`.
 
-#### Dependencies
+#### MongoDB
 
 Climate Explorer uses MongoDB as an intermediate staging area for the ingestion
 and cleansing of data prior to adding it to ta Postgres database. Due to this
 dependency this application requires a running instance of a MongoDB database.
 For example, on MacOS MongoDB is started by opening a new terminal window and
 entering the command `mongodb`.
+
+The steps required to install MongoDB can be found [here](https://docs.mongodb.com/manual/installation/).
+
+#### Postgres
 
 <TBD - document how to start Postgres instance>
 
