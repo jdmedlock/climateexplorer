@@ -5,6 +5,7 @@ import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers.js';
 
 import UserAPI from './datasources/user';
+import MongoAPI from './models/mongodb/MongoAPI';
 
 // Data sources required by the resolvers. Note that userAPI is instantiated
 // outside of dataSources so it will be available within the context.
@@ -38,7 +39,16 @@ const server = new ApolloServer({
   context,
 });
 
-if (process.env.NODE_ENV !== 'test')
+if (process.env.NODE_ENV !== 'test') {
   server
     .listen({ port: 4000 })
     .then(({ url }) => console.log(`🚀 app running at ${url}`));
+}
+
+// Test MongoDB 
+const mongoAPI = new MongoAPI();
+(async function() {
+  await mongoAPI.connect();
+  await mongoAPI.find('users');
+  await mongoAPI.disconnect();
+})();
