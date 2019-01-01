@@ -46,6 +46,16 @@ support offline execution.
 
 The production version of the app on GitHub Pages is built by running `npm run publish`.
 
+#### Dependencies
+
+Climate Explorer uses MongoDB as an intermediate staging area for the ingestion
+and cleansing of data prior to adding it to ta Postgres database. Due to this
+dependency this application requires a running instance of a MongoDB database.
+For example, on MacOS MongoDB is started by opening a new terminal window and
+entering the command `mongodb`.
+
+<TBD - document how to start Postgres instance>
+
 ### Environment Variables
 
 Environment variables that control the operation of the app are defined in the
@@ -84,11 +94,16 @@ This app has the following dependencies
 | dotenv         | Runtime     | Environment variables | `.env` |
 | graphql        | Runtime     | GraphQL Reference implementation | N/a |
 | isemail        | Runtime     | Email address validator | N/a |
+| mongodb        | Runtime     | MongoDB Driver | N/a |
 | nodemon        | Development | NodeJS Monitor | `package.json` scripts |
 
 ### External Dependencies
 
-N/a
+The MongoDB and Postgres databases files required by Climate Explorer are
+stored in a file system outside the project directory. In the case of MongoDB
+the database files are maintained in `/data/db`.
+
+<TBD - document location of Postgres database files>
 
 ## Server Architecture
 
