@@ -1,8 +1,8 @@
 import { DataSource } from 'apollo-datasource';
 import isEmail from 'isemail';
 
-class UserAPI extends DataSource {
-  constructor() {
+class User extends DataSource {
+  constructor(mongo) {
     super();
     this.users = [
       {
@@ -16,6 +16,8 @@ class UserAPI extends DataSource {
         email: 'jane@gmail.com'
       }
     ];
+    this.mongo = mongo;
+    this.context = null;
   }
 
   /**
@@ -38,10 +40,12 @@ class UserAPI extends DataSource {
     if (!email || !isEmail.validate(email)) {
       return null;
     }
-    const user = this.users.find(user => user.email === email);
+
+    const user = await this.mongo.findOne('users', email);
+    console.log('findUserByEmail - user: ', user);
     return user;
   }
 
 }
 
-module.exports = UserAPI;
+module.exports = User;
