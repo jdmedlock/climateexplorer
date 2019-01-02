@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+
 import { ApolloServer } from 'apollo-server';
 
 import isEmail from 'isemail';
@@ -6,6 +8,8 @@ import resolvers from './graphql/resolvers.js';
 
 import User from './datasources/User';
 import MongoAPI from './models/mongodb/MongoAPI';
+
+dotenv.config();
 
 // Data sources required by the resolvers. These are available to subclasses
 // of DataSource via config.context.

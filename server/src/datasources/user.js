@@ -2,38 +2,36 @@ import { DataSource } from 'apollo-datasource';
 import isEmail from 'isemail';
 
 class User extends DataSource {
-  constructor(mongo) {
+  /**
+   * Creates an instance of User
+   * @param {*} mongoAPI Object containing Mongo access functions 
+   * @memberof User
+   */
+  constructor(mongoAPI) {
     super();
-    this.users = [
-      {
-        id: '1',
-        name: 'Joe User',
-        email: 'joe@gmail.com'
-      },
-      {
-        id: '2',
-        name: 'Jane Doe',
-        email: 'jane@gmail.com'
-      }
-    ];
-    this.mongo = mongo;
+    this.mongoAPI = mongoAPI;
     this.context = null;
   }
 
   /**
-   * This is a function that gets called by ApolloServer when being setup.
-   * This function gets called with the datasource config including things
-   * like caches and context. We'll assign this.context to the request context
-   * here, so we can know about the user making requests
+   * `initialize` is called by ApolloServer as part of its setup process. We'll 
+   * assign the request context to this object, so we can know about the user
+   * making requests.
+   * @param {*} config DataSource configuration including things like caches
+   * and context
+   * @memberof User
    */
   initialize(config) {
     this.context = config.context;
   }
 
   /**
-   * User can be called with an argument that includes email, but it doesn't
-   * have to be. If the user is already on the context, it will use that user
-   * instead
+   * Retrieve a single user based on the email address that is provided when
+   * invoked. If the user is already on the context, that users email address
+   * will be used instead of `emailArg`.
+   * @param {*} emailArg Email address of the user
+   * @returns User object retrieved from the database
+   * @memberof User
    */
   async findUserByEmail(emailArg) {
     const email = this.context && this.context.user ? this.context.user.email : emailArg;
@@ -41,7 +39,7 @@ class User extends DataSource {
       return null;
     }
 
-    const user = await this.mongo.findOne('users', { email: email });
+    const user = await this.mongoAPI.findOne('users', { email: email });
     process.env.NODE_ENV === 'production' ? null : console.log('findUserByEmail - user: ', user);
     return user;
   }

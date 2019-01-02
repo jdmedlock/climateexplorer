@@ -15,5 +15,8 @@ module.exports = {
         return Buffer.from(email).toString('base64');
       }
     },
+    logoff: async (_, __, { dataSources }) => {
+      return null;
+    },
   },
 };

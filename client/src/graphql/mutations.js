@@ -5,3 +5,9 @@ export const LOGIN_USER = gql`
     login(email: $email)
   }
 `;
+
+export const LOGOFF_USER = gql`
+  mutation logoff {
+    logoff
+  }
+`;
