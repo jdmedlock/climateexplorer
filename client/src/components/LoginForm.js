@@ -5,12 +5,11 @@ import debounce from "lodash.debounce";
 import isEmail from 'isemail';
 
 import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
-
-import CEButton from './CEButton';
 
 const styles = theme => ({
   container: {
@@ -20,6 +19,11 @@ const styles = theme => ({
     marginTop: "2rem",
   },
   formControl: {
+    margin: theme.spacing.unit,
+  },
+  button: {
+    backgroundColor: theme.palette.primary.light,
+    fontWeight: 600,
     margin: theme.spacing.unit,
   },
 });
@@ -42,7 +46,7 @@ class LoginForm extends Component {
     this.emitChangeDebounce = debounce(this.saveEmailAddress, 75);
   }
 
-  loginClickHandler = () => {
+  clickHandler = () => {
     let errorText = '';
     if (isEmail.validate(this.state.emailAddress)) {
       errorText = '';
@@ -79,7 +83,9 @@ class LoginForm extends Component {
             onChange={ this.emailChangeHandler }
           />
           <FormHelperText id="input-email-error">{ this.state.emailErrorText}</FormHelperText>
-          <CEButton name="Login" clickHandler={ this.loginClickHandler } />
+          <Button variant="contained" className={ classes.button } onClick={ this.clickHandler } >
+            Login
+          </Button>
         </FormControl>
       </div>
     );
