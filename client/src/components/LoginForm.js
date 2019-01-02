@@ -68,19 +68,19 @@ class LoginForm extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.container}>
-          <FormControl className={ classes.formControl } error={ false }
-            aria-describedby="input-email">
-            <InputLabel htmlFor="input-email">Email address:</InputLabel>
-            <Input id="input-email"
-              autoFocus={ true } required={ true }
-              placeholder="Enter your email address"
-              variant="filled" 
-              value={ this.state.email}
-              onChange={ this.emailChangeHandler }
-            />
-            <FormHelperText id="input-email-error">{ this.state.emailErrorText}</FormHelperText>
-            <CEButton name="Login" clickHandler={ this.loginClickHandler } />
-          </FormControl>
+        <FormControl className={ classes.formControl } error={ false }
+          aria-describedby="input-email">
+          <InputLabel htmlFor="input-email">Email address:</InputLabel>
+          <Input id="input-email"
+            autoFocus={ true } required={ true }
+            placeholder="Enter your email address"
+            variant="filled" 
+            value={ this.state.email}
+            onChange={ this.emailChangeHandler }
+          />
+          <FormHelperText id="input-email-error">{ this.state.emailErrorText}</FormHelperText>
+          <CEButton name="Login" clickHandler={ this.loginClickHandler } />
+        </FormControl>
       </div>
     );
   }
