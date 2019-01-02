@@ -33,10 +33,11 @@ class TopBar extends Component {
     title: PropTypes.string.isRequired,
   };
 
-  clickHandler = (buttonRole, client) => {
+  clickHandler = async (buttonRole, client, mutationFunc) => {
     if (buttonRole === "Logoff") {
-        client.writeData({ data: { isLoggedIn: false } });
-        localStorage.clear();
+      await mutationFunc();
+      client.writeData({ data: { isLoggedIn: false } });
+      localStorage.clear();
     }
   }
 
@@ -57,7 +58,7 @@ class TopBar extends Component {
                     <Mutation mutation={ LOGOFF_USER } >
                       {mutationFunc => 
                         <Button variant="contained" className={ classes.button }
-                          onClick={ () => this.clickHandler(buttonRole, client) } >
+                          onClick={ () => this.clickHandler(buttonRole, client, mutationFunc) } >
                           { buttonRole }
                         </Button>
                       }
