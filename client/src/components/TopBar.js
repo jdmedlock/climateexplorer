@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { ApolloConsumer, Query } from 'react-apollo';
+import { ApolloConsumer, Mutation, Query } from 'react-apollo';
 import { IS_LOGGED_IN } from '../graphql/queries';
+import { LOGOFF_USER } from '../graphql/mutations';
 
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -34,8 +35,8 @@ class TopBar extends Component {
 
   clickHandler = (buttonRole, client) => {
     if (buttonRole === "Logoff") {
-      client.writeData({ data: { isLoggedIn: false } });
-      localStorage.clear();
+        client.writeData({ data: { isLoggedIn: false } });
+        localStorage.clear();
     }
   }
 
@@ -53,10 +54,14 @@ class TopBar extends Component {
                 {({ data, loading, error }) => {
                   const buttonRole = (data.isLoggedIn ? "Logoff" : "Login");
                   return (
-                    <Button variant="contained" className={ classes.button }
-                      onClick={ () => this.clickHandler(buttonRole, client) } >
-                      { buttonRole }
-                    </Button>
+                    <Mutation mutation={ LOGOFF_USER } >
+                      {mutationFunc => 
+                        <Button variant="contained" className={ classes.button }
+                          onClick={ () => this.clickHandler(buttonRole, client) } >
+                          { buttonRole }
+                        </Button>
+                      }
+                    </Mutation>
                   );
                 }}
               </Query>
