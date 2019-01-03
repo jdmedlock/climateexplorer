@@ -11,6 +11,23 @@ import MongoAPI from './models/mongodb/MongoAPI';
 
 dotenv.config();
 
+// TODO: Temporary Postgres test
+const pg = require('pg');
+const pool = new pg.Pool({
+  user: process.env.PG_CONNECTION_USER,
+  host: '127.0.0.1',
+  database: process.env.PG_CONNECTION_DBNAME,
+  password: process.env.PG_CONNECTION_PASSWORD,
+  port: process.env.PG_CONNECTION_PORT
+});
+
+pool.query("SELECT * FROM etl_test.locations", (err, res) => {
+  res.rows.forEach(row => {
+    console.log('id: ', row.id, ' name: ', row.name);
+  });
+  pool.end();
+});
+
 // Data sources required by the resolvers. These are available to subclasses
 // of DataSource via config.context.
 const mongo = new MongoAPI();
