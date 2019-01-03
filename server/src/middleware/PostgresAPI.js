@@ -20,10 +20,10 @@ class PostgresAPI {
     try {
       this.pool = new this.pg.Pool({
         user: process.env.PG_CONNECTION_USER,
+        password: process.env.PG_CONNECTION_PASSWORD,
         host: process.env.PG_CONNECTION_HOSTADDR,
         database: process.env.PG_CONNECTION_DBNAME,
-        password: process.env.PG_CONNECTION_PASSWORD,
-        port: process.env.PG_CONNECTION_PORT
+        port: process.env.PG_CONNECTION_PORT,
       });
       console.log(`Connected to Postgres! - ${process.env.PG_CONNECTION_HOSTADDR}:${process.env.PG_CONNECTION_PORT}`);
     } catch (err) {
@@ -40,10 +40,9 @@ class PostgresAPI {
    */
   async selectAll(tableName) {
     this.connect();
-    await pool.query("SELECT * FROM etl_test.locations", (err, res) => {
-      pool.end();
-    });
-    return res.rows;
+    const locations = await this.pool.query("SELECT * FROM etl_test.locations");
+    this.pool.end();
+    return locations.rows;
   }
 
 }

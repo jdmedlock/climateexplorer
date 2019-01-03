@@ -13,28 +13,10 @@ import PostgresAPI from './middleware/PostgresAPI';
 
 dotenv.config();
 
-// TODO: Temporary Postgres test
-/*
-const pg = require('pg');
-const pool = new pg.Pool({
-  user: process.env.PG_CONNECTION_USER,
-  host: process.env.PG_HOSTADDR,
-  database: process.env.PG_CONNECTION_DBNAME,
-  password: process.env.PG_CONNECTION_PASSWORD,
-  port: process.env.PG_CONNECTION_PORT
-});
-
-pool.query("SELECT * FROM etl_test.locations", (err, res) => {
-  res.rows.forEach(row => {
-    console.log('id: ', row.id, ' name: ', row.name);
-  });
-  pool.end();
-});
-*/
-
 // Data sources required by the resolvers. These are available to subclasses
 // of DataSource via config.context.
 const postgres = new PostgresAPI();
+console.log(postgres);
 const locationAPI = new Location(postgres);
 
 const mongo = new MongoAPI();
@@ -46,10 +28,13 @@ const dataSources = () => ({
 });
 
 // TODO: Temporary test of Location access in Postgres
-const locations =  locationAPI.findLocations();
-locations.forEach(row => {
-  console.log('id: ', row.id, ' name: ', row.name);
-});
+console.log('Starting integrated Postgres test...');
+(async () => {
+  const locations = await locationAPI.findLocations();
+  locations.forEach(row => {
+    console.log('id: ', row.id, ' name: ', row.name);
+  });
+})();
 
 // Create the context that will be shared across all resolvers
 const context = async ({ req }) => {

@@ -32,7 +32,7 @@ class Location extends DataSource {
   async findLocations() {
     const locations = await this.postgresAPI.selectAll('locations');
     process.env.NODE_ENV === 'production' ? null : console.log('findLocation - locations: ', locations);
-    return locations.rows;
+    return locations;
   }
 
 }
