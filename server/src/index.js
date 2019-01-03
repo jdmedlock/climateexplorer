@@ -6,12 +6,15 @@ import isEmail from 'isemail';
 import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers.js';
 
+import Location from './datasources/Location';
 import User from './datasources/User';
 import MongoAPI from './middleware/MongoAPI';
+import PostgresAPI from './middleware/PostgresAPI';
 
 dotenv.config();
 
 // TODO: Temporary Postgres test
+/*
 const pg = require('pg');
 const pool = new pg.Pool({
   user: process.env.PG_CONNECTION_USER,
@@ -27,13 +30,25 @@ pool.query("SELECT * FROM etl_test.locations", (err, res) => {
   });
   pool.end();
 });
+*/
 
 // Data sources required by the resolvers. These are available to subclasses
 // of DataSource via config.context.
+const postgres = new PostgresAPI();
+const locationAPI = new Location(postgres);
+
 const mongo = new MongoAPI();
 const userAPI = new User(mongo);
+
 const dataSources = () => ({
   userAPI: userAPI,
+  locationAPI: locationAPI,
+});
+
+// TODO: Temporary test of Location access in Postgres
+const locations =  locationAPI.findLocations();
+locations.forEach(row => {
+  console.log('id: ', row.id, ' name: ', row.name);
 });
 
 // Create the context that will be shared across all resolvers

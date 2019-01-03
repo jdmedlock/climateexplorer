@@ -13,7 +13,7 @@ class PostgresAPI {
    */
   async connect() {
     // Return immediately if a connection has already been established.
-    if (this.client) {
+    if (this.pool) {
       return;
     }
 
@@ -40,7 +40,7 @@ class PostgresAPI {
    */
   async selectAll(tableName) {
     this.connect();
-    pool.query("SELECT * FROM etl_test.locations", (err, res) => {
+    await pool.query("SELECT * FROM etl_test.locations", (err, res) => {
       pool.end();
     });
     return res.rows;
