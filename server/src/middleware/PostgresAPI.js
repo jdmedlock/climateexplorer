@@ -33,6 +33,18 @@ class PostgresAPI {
   };
 
   /**
+   * Release the connection pool
+   * @memberof PostgresAPI
+   */
+  async disconnect() {
+    if (!this.pool) {
+      return;
+    }
+    await this.pool.end();
+
+  }
+
+  /**
    * Retrieve an entire table from the database.
    * @param {*} tableName
    * @returns Matching rows or null if none found.
@@ -41,7 +53,6 @@ class PostgresAPI {
   async selectAll(tableName) {
     this.connect();
     const locations = await this.pool.query("SELECT * FROM etl_test.locations");
-    this.pool.end();
     return locations.rows;
   }
 

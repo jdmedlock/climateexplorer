@@ -4,6 +4,10 @@ module.exports = {
       return dataSources.userAPI.findUserByEmail("joe@gmail.com");
     },
 
+    locations: async(_, __, { dataSources }) => {
+      return dataSources.locationAPI.findLocations();
+    },
+
     user: async (_, { email }, { dataSources }) => {
       return dataSources.userAPI.findUserByEmail(email);
     },

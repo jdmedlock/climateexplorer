@@ -16,7 +16,6 @@ dotenv.config();
 // Data sources required by the resolvers. These are available to subclasses
 // of DataSource via config.context.
 const postgres = new PostgresAPI();
-console.log(postgres);
 const locationAPI = new Location(postgres);
 
 const mongo = new MongoAPI();
@@ -26,15 +25,6 @@ const dataSources = () => ({
   userAPI: userAPI,
   locationAPI: locationAPI,
 });
-
-// TODO: Temporary test of Location access in Postgres
-console.log('Starting integrated Postgres test...');
-(async () => {
-  const locations = await locationAPI.findLocations();
-  locations.forEach(row => {
-    console.log('id: ', row.id, ' name: ', row.name);
-  });
-})();
 
 // Create the context that will be shared across all resolvers
 const context = async ({ req }) => {
