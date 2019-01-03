@@ -15,7 +15,7 @@ dotenv.config();
 const pg = require('pg');
 const pool = new pg.Pool({
   user: process.env.PG_CONNECTION_USER,
-  host: '127.0.0.1',
+  host: process.env.PG_HOSTADDR,
   database: process.env.PG_CONNECTION_DBNAME,
   password: process.env.PG_CONNECTION_PASSWORD,
   port: process.env.PG_CONNECTION_PORT
