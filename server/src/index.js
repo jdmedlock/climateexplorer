@@ -7,7 +7,7 @@ import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers.js';
 
 import User from './datasources/User';
-import MongoAPI from './models/mongodb/MongoAPI';
+import MongoAPI from './middleware/MongoAPI';
 
 dotenv.config();
 
