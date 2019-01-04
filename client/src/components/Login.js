@@ -12,9 +12,12 @@ const Login = (props) => {
   return (
     <ApolloConsumer>
       {client => (
-        <Mutation
-          mutation={ LOGIN_USER }
+        <Mutation mutation={ LOGIN_USER }
           onCompleted={({ login }) => {
+            if (!login) {
+              localStorage.clear();
+              return;
+            }
             localStorage.setItem('token', login);
             client.writeData({ data: { isLoggedIn: true } });
           }}

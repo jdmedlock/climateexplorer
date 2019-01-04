@@ -50,9 +50,11 @@ class PostgresAPI {
    * @returns Matching rows or null if none found.
    * @memberof PostgresAPI
    */
-  async selectAll(tableName) {
+  async selectAll(schemaName, tableName) {
     this.connect();
-    const locations = await this.pool.query("SELECT * FROM etl_test.locations");
+    const locations = await this.pool.query(
+      `SELECT * FROM ${schemaName}.${tableName}`
+    );
     return locations.rows;
   }
 

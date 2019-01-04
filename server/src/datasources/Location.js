@@ -30,7 +30,7 @@ class Location extends DataSource {
    * @memberof Location
    */
   async findLocations() {
-    const locations = await this.postgresAPI.selectAll('locations');
+    const locations = await this.postgresAPI.selectAll(process.env.PG_CONNECTION_SCHEMA, 'locations');
     process.env.NODE_ENV === 'production' ? null : console.log('findLocation - locations: ', locations);
     return locations;
   }

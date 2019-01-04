@@ -50,9 +50,14 @@ class LoginForm extends Component {
     let errorText = '';
     if (isEmail.validate(this.state.emailAddress)) {
       errorText = '';
-      this.props.login({ variables: { email: this.state.emailAddress } });
     } else {
       errorText = 'Invalid email address entered';
+    }
+    if (errorText === '') {
+      const userToken = this.props.login({ variables: { email: this.state.emailAddress } });
+      if (!userToken) {
+        errorText = "Unknown user or invalid password entered.";
+      }
     }
     this.setState({ emailErrorText: errorText });
   }

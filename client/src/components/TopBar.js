@@ -35,6 +35,7 @@ class TopBar extends Component {
 
   clickHandler = async (buttonRole, client, mutationFunc) => {
     if (buttonRole === "Logoff") {
+      console.log('Logging off user');
       await mutationFunc();
       client.writeData({ data: { isLoggedIn: false } });
       localStorage.clear();
