@@ -42,9 +42,9 @@ const UnderConstruction = (props) => {
 };
 
 UnderConstruction.propTypes = {
+  classes: PropTypes.object.isRequired,
   title: PropTypes.string,
   href: PropTypes.string,
-  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(UnderConstruction);

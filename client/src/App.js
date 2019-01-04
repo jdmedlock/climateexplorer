@@ -30,6 +30,12 @@ const App = () => {
           <section className="App-results">
             <Query query={ IS_LOGGED_IN }>
               {({ data, loading, error }) => {
+                if (loading) {
+                  return <p>Loading...</p>;
+                }
+                if (error) {
+                  return <p>An error occurred</p>;
+                }
                 return (data.isLoggedIn ? <UnderConstruction /> : <Login />);
               }}
             </Query>

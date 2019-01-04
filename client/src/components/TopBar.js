@@ -53,6 +53,12 @@ class TopBar extends Component {
               </Typography>
               <Query query={ IS_LOGGED_IN }>
                 {({ data, loading, error }) => {
+                  if (loading) {
+                    return <p>Loading...</p>;
+                  }
+                  if (error) {
+                    return <p>An error occurred</p>;
+                  }
                   const buttonRole = (data.isLoggedIn ? "Logoff" : "Login");
                   return (
                     <Mutation mutation={ LOGOFF_USER } >
