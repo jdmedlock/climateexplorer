@@ -54,11 +54,15 @@ dependency this application requires a running instance of a MongoDB database.
 For example, on MacOS MongoDB is started by opening a new terminal window and
 entering the command `mongodb`.
 
-The steps required to install MongoDB can be found [here](https://docs.mongodb.com/manual/installation/).
+The steps required to install MongoDB are be found [here](https://docs.mongodb.com/manual/installation/).
 
-#### Postgres
+#### PostgreSQL
 
-<TBD - document how to start Postgres instance>
+PostgreSQL is used as the operational database for climate data and is
+populated from the staging database. At this time the PostgreSQL instance is 
+started from the pgAdmin tool.
+
+The steps required to install PostgreSQL are found [here](https://www.postgresql.org/download/).
 
 ### Environment Variables
 
@@ -78,7 +82,14 @@ out of application code it does not make them secure.
 
 | Environment Variable    | Description | Example Setting |
 |:------------------------|:------------|:----------------|
-| TBD                     | TBD         | TBD             |
+| MONGODB_URL             | MongoDB instance | `MONGODB_URL="mongodb://localhost:27017/etl"` |
+| MONGODB_CE_DBNAME       | Climate Explorer database name | `MONGODB_CE_DBNAME="etl"` |
+| PG_CONNECTION_USER      | Postgres User id | `PG_CONNECTION_USER="xxxxxxxx"` |
+| PG_CONNECTION_PASSWORD  | Postgres Password | `PG_CONNECTION_PASSWORD="xxxxxxxx"` |
+| PG_CONNECTION_HOSTADDR  | Postgres instance host address | `PG_CONNECTION_HOSTADDR="127.0.0.1"` |
+| PG_CONNECTION_PORT      | Postgres instance port number | `PG_CONNECTION_PORT="5432"` |
+| PG_CONNECTION_DBNAME    | Postgres database name | `PG_CONNECTION_DBNAME="climateexplorer"` |
+| PG_CONNECTION_SCHEMA    | Postgres schema name | `PG_CONNECTION_SCHEMA="ce"` |
 
 ## Dependencies
 
@@ -100,14 +111,14 @@ This app has the following dependencies
 | isemail        | Runtime     | Email address validator | N/a |
 | mongodb        | Runtime     | MongoDB Driver | N/a |
 | nodemon        | Development | NodeJS Monitor | `package.json` scripts |
+| pg             | Runtime     | PostgreSQL Driver | N/a |
 
 ### External Dependencies
 
 The MongoDB and Postgres databases files required by Climate Explorer are
 stored in a file system outside the project directory. In the case of MongoDB
-the database files are maintained in `/data/db`.
-
-<TBD - document location of Postgres database files>
+the database files are maintained in `/data/db`, and the PostgreSQL files are
+in `/data/pg`.
 
 ## Server Architecture
 
