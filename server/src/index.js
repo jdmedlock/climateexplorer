@@ -1,17 +1,29 @@
+import dotenv from 'dotenv';
+
 import { ApolloServer } from 'apollo-server';
 
 import isEmail from 'isemail';
 import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers.js';
 
-import UserAPI from './datasources/user';
-import MongoAPI from './models/mongodb/MongoAPI';
+import Location from './datasources/Location';
+import User from './datasources/User';
+import MongoAPI from './middleware/MongoAPI';
+import PostgresAPI from './middleware/PostgresAPI';
 
-// Data sources required by the resolvers. Note that userAPI is instantiated
-// outside of dataSources so it will be available within the context.
-const userAPI = new UserAPI();
+dotenv.config();
+
+// Data sources required by the resolvers. These are available to subclasses
+// of DataSource via config.context.
+const postgres = new PostgresAPI();
+const locationAPI = new Location(postgres);
+
+const mongo = new MongoAPI();
+const userAPI = new User(mongo);
+
 const dataSources = () => ({
   userAPI: userAPI,
+  locationAPI: locationAPI,
 });
 
 // Create the context that will be shared across all resolvers
@@ -26,7 +38,7 @@ const context = async ({ req }) => {
   // Locate the user based on their email address.
   // This would normally be via a profile lookup in the db, but for now
   // we're using temporary data for testing.
-  const user = userAPI.findUserByEmail(email);
+  const user = await userAPI.findUserByEmail(email);
   return { user: { user } };
 };
 
@@ -34,9 +46,9 @@ const context = async ({ req }) => {
 // In the test env, we'll manually start it as part of the test script
 const server = new ApolloServer({ 
   typeDefs,
-  resolvers,
   dataSources,
   context,
+  resolvers,
 });
 
 if (process.env.NODE_ENV !== 'test') {
@@ -44,11 +56,3 @@ if (process.env.NODE_ENV !== 'test') {
     .listen({ port: 4000 })
     .then(({ url }) => console.log(`🚀 app running at ${url}`));
 }
-
-// Test MongoDB 
-const mongoAPI = new MongoAPI();
-(async function() {
-  await mongoAPI.connect();
-  await mongoAPI.find('users');
-  await mongoAPI.disconnect();
-})();

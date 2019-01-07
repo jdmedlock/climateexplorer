@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import { Query } from 'react-apollo';
 import { IS_LOGGED_IN } from './graphql/queries';
@@ -12,58 +12,43 @@ import Login from './components/Login';
 import UnderConstruction from './components/UnderConstruction';
 import BottomBar from './components/BottomBar';
 
-  
-class App extends Component {
-  constructor(props) {
-    super(props);
+const App = () => {
+  const theme = createMuiTheme({
+    typography: {
+      useNextVariants: true
+    }
+  });
 
-    this.state = {
-      getLoginEmail: false,
-    };
-  }
+  return (
+    <div className="App">
+      <GlobalErrorBoundary>
+        <MuiThemeProvider theme={ theme }>
+          <header className="App-header">
+            <TopBar title="Climate Explorer" />
+          </header>
 
-  loginClickHandler = () => {
-    this.setState({ getLoginEmail: true });
-  }
+          <section className="App-results">
+            <Query query={ IS_LOGGED_IN }>
+              {({ data, loading, error }) => {
+                if (loading) {
+                  return <p>Loading...</p>;
+                }
+                if (error) {
+                  return <p>An error occurred</p>;
+                }
+                return (data.isLoggedIn ? <UnderConstruction /> : <Login />);
+              }}
+            </Query>
+          </section>
 
-  setLoginEmail = (loginEmail) => {
-    this.setState({
-      getLoginEmail: false,
-    });
-  }
-
-  render = () => {
-    const theme = createMuiTheme({
-      typography: {
-        useNextVariants: true
-      }
-    });
-
-    return (
-      <div className="App">
-        <GlobalErrorBoundary>
-          <MuiThemeProvider theme={ theme }>
-            <header className="App-header">
-              <TopBar title="Climate Explorer" loginClickHandler={ this.loginClickHandler } />
-            </header>
-
-            <section className="App-results">
-              <Query query={ IS_LOGGED_IN }>
-                {({ data, loading, error }) => {
-                  return (data.isLoggedIn ? <UnderConstruction /> : <Login />);
-                }}
-              </Query>
-            </section>
-
-            <footer className="App-footer">
-              <BottomBar title="Data courtesy U.S. National Oceanographic and Atmospheric Administration (NOAA)"
-                href={ process.env.REACT_APP_NOAA_HOMEPAGE } />
-            </footer>
-          </MuiThemeProvider>
-        </GlobalErrorBoundary>
-      </div>
-    );
-  }
+          <footer className="App-footer">
+            <BottomBar title="Data courtesy U.S. National Oceanographic and Atmospheric Administration (NOAA)"
+              href={ process.env.REACT_APP_NOAA_HOMEPAGE } />
+          </footer>
+        </MuiThemeProvider>
+      </GlobalErrorBoundary>
+    </div>
+  );
 }
 
 export default App;

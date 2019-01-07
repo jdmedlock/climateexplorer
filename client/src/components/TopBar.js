@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+
+import { ApolloConsumer, Mutation, Query } from 'react-apollo';
+import { IS_LOGGED_IN } from '../graphql/queries';
+import { LOGOFF_USER } from '../graphql/mutations';
 
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
-import CEButton from './CEButton';
-
-const styles = {
+const styles = theme => ({
   root: {
     flexGrow: 1,
     fontWeight: 800,
@@ -16,39 +19,66 @@ const styles = {
   grow: {
     flexGrow: 1,
   },
-};
+  button: {
+    backgroundColor: theme.palette.primary.light,
+    fontWeight: 600,
+    margin: theme.spacing.unit,
+  },
+});
 
-class  TopBar extends React.Component {
+class TopBar extends Component {
 
   static propTypes = {
     classes: PropTypes.object.isRequired,
     title: PropTypes.string.isRequired,
-    loginClickHandler: PropTypes.func.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      
-    };
+  clickHandler = async (buttonRole, client, mutationFunc) => {
+    if (buttonRole === "Logoff") {
+      console.log('Logging off user');
+      await mutationFunc();
+      client.writeData({ data: { isLoggedIn: false } });
+      localStorage.clear();
+    }
   }
 
   render = () => {
-    const { classes, title, loginClickHandler } = this.props;
+    const { classes, title } = this.props;
     return (
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h4" color="inherit" className={classes.grow}>
-            {title}
-          </Typography>
-          <CEButton name="Login" clickHandler={ loginClickHandler } />
-        </Toolbar>
-      </AppBar>
+      <ApolloConsumer>
+        {client => (
+          <AppBar position="static">
+            <Toolbar>
+              <Typography variant="h4" color="inherit" className={classes.grow}>
+                {title}
+              </Typography>
+              <Query query={ IS_LOGGED_IN }>
+                {({ data, loading, error }) => {
+                  if (loading) {
+                    return <p>Loading...</p>;
+                  }
+                  if (error) {
+                    return <p>An error occurred</p>;
+                  }
+                  const buttonRole = (data.isLoggedIn ? "Logoff" : "Login");
+                  return (
+                    <Mutation mutation={ LOGOFF_USER } >
+                      {mutationFunc => 
+                        <Button variant="contained" className={ classes.button }
+                          onClick={ () => this.clickHandler(buttonRole, client, mutationFunc) } >
+                          { buttonRole }
+                        </Button>
+                      }
+                    </Mutation>
+                  );
+                }}
+              </Query>
+            </Toolbar>
+          </AppBar>
+        )}
+      </ApolloConsumer>
     );
   }
-};
-
-
+}
 
 export default withStyles(styles)(TopBar);
