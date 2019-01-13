@@ -2,18 +2,18 @@ import Client from 'node-ftp';
 
 
 class FTPAPI {
-  constructor(hostURL, hostPort, userName, userPassword) {
-    this.hostURL = hostURL;
-    this.port = hostPort;
-    this.user = userName;
-    this.password = userPassword;
+  constructor(connectionOptions) {
+    this.host_url = connectionOptions.host_url;
+    this.host_port = connectionOptions.host_port;
+    this.user = connectionOptions.userName;
+    this.password = connectionOptions.userPassword;
     this.ftpClient = new Client();
   }
 
   connect() {
     this.ftpClient.connect( {
-      host: this.hostURL,
-      port: this.port,
+      host: this.host_url,
+      port: this.host_port,
       user: this.user,
       password: this.password,
     });

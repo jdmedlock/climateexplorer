@@ -59,7 +59,18 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Test FTP
-let ftpSession = new FTPAPI('ftp.ncdc.noaa.gov', 21, 'anonymous', '');
-ftpSession.getDirectory('/pub/data/ghcn/daily');
-ftpSession = new FTPAPI('ftp.ncdc.noaa.gov', 21, 'anonymous', '');
-ftpSession.getFile('/pub/data/ghcn/daily/ghcnd-countries.txt');
+let ftpSession = new FTPAPI({
+  host_url: process.env.NOAA_FTP_URL, 
+  host_port: process.env.NOAA_FTP_PORT, 
+  user: process.env.NOAA_FTP_USER, 
+  password: process.env.NOAA_FTP_PASSWORD
+});
+ftpSession.getDirectory(process.env.NOAA_FTP_GHCN_DIRECTORY);
+
+ftpSession = new FTPAPI({
+  host_url: process.env.NOAA_FTP_URL, 
+  host_port: process.env.NOAA_FTP_PORT, 
+  user: process.env.NOAA_FTP_USER, 
+  password: process.env.NOAA_FTP_PASSWORD
+});
+ftpSession.getFile(`${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`);
