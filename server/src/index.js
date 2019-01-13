@@ -59,18 +59,22 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Test FTP
-let ftpSession = new FTPAPI({
+let ftpSession_1 = new FTPAPI({
   host_url: process.env.NOAA_FTP_URL, 
   host_port: process.env.NOAA_FTP_PORT, 
   user: process.env.NOAA_FTP_USER, 
   password: process.env.NOAA_FTP_PASSWORD
 });
-ftpSession.getDirectory(process.env.NOAA_FTP_GHCN_DIRECTORY);
-
-ftpSession = new FTPAPI({
-  host_url: process.env.NOAA_FTP_URL, 
-  host_port: process.env.NOAA_FTP_PORT, 
-  user: process.env.NOAA_FTP_USER, 
-  password: process.env.NOAA_FTP_PASSWORD
+ftpSession_1.connect()
+.then(() => {
+  ftpSession_1.getDirectory(process.env.NOAA_FTP_GHCN_DIRECTORY)
+  .then(list => {
+    console.log('Dir list: ', list);
+    return ftpSession_1.getFile(`${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`);
+  })
+  .then(stream => {
+    console.log("File contents: ");
+    stream.pipe(process.stdout);
+    ftpSession_1.disconnect();
+  });
 });
-ftpSession.getFile(`${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`);

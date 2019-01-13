@@ -1,17 +1,19 @@
-import Client from 'node-ftp';
+import FTPClient from 'promise-ftp';
 
 
 class FTPAPI {
+
   constructor(connectionOptions) {
     this.host_url = connectionOptions.host_url;
     this.host_port = connectionOptions.host_port;
     this.user = connectionOptions.userName;
     this.password = connectionOptions.userPassword;
-    this.ftpClient = new Client();
+    this.ftpClient = new FTPClient();
   }
 
   connect() {
-    this.ftpClient.connect( {
+    console.log('Attempting to connect...');
+    return this.ftpClient.connect( {
       host: this.host_url,
       port: this.host_port,
       user: this.user,
@@ -20,38 +22,37 @@ class FTPAPI {
   }
 
   disconnect() {
-    this.ftpClient.end();
+    return this.ftpClient.end();
   }
 
   getDirectory(directoryName) {
-    // Retrieve the directory list if the client is available
-    this.connect();
-    this.ftpClient.on('ready', () => {
-      this.ftpClient.list(directoryName, (err, list) => {
-        if (err) {
-          throw err;
-        }
-        console.dir(list);
-        this.disconnect();
+    let directoryList = null;
+    return new Promise((resolve,reject) => {
+      this.ftpClient.list(directoryName)
+      .then((list) => {
+        directoryList = list;
+      })
+      .then(() => {
+        resolve(directoryList); 
       });
     });
   }
 
   getFile(fileName) {
-    this.connect();
-    this.ftpClient.on('ready', () => {
-      this.ftpClient.get(fileName, (err, stream) => {
-        if (err) {
-          throw err;
-        }
-        stream.once('close', () => { 
-          this.disconnect();
+    return new Promise((resolve,reject) => {
+      this.ftpClient.get(fileName)
+      .then((stream) => {
+        return new Promise(function (resolve, reject) {
+          stream.once('close', resolve);
+          stream.once('error', reject);
+          resolve(stream);
         });
-        stream.pipe(process.stdout);
+      })
+      .then((stream) => {
+        resolve(stream);
       });
     });
   }
-
 }
 
 export default FTPAPI;
