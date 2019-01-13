@@ -8,6 +8,7 @@ import resolvers from './graphql/resolvers.js';
 
 import Location from './datasources/Location';
 import User from './datasources/User';
+import FTPAPI from './middleware/FTPAPI';
 import MongoAPI from './middleware/MongoAPI';
 import PostgresAPI from './middleware/PostgresAPI';
 
@@ -56,3 +57,9 @@ if (process.env.NODE_ENV !== 'test') {
     .listen({ port: 4000 })
     .then(({ url }) => console.log(`🚀 app running at ${url}`));
 }
+
+// Test FTP
+let ftpSession = new FTPAPI('ftp.ncdc.noaa.gov', 21, 'anonymous', '');
+ftpSession.getDirectory('/pub/data/ghcn/daily');
+ftpSession = new FTPAPI('ftp.ncdc.noaa.gov', 21, 'anonymous', '');
+ftpSession.getFile('/pub/data/ghcn/daily/ghcnd-countries.txt');
