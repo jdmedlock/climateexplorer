@@ -37,7 +37,7 @@ class FTPAPI {
       });
     });
   }
-
+ 
   getFile(fileName) {
     return new Promise((resolve,reject) => {
       this.ftpClient.get(fileName)
