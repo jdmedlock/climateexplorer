@@ -8,6 +8,12 @@ const typeDefs = gql`
     user (email: String!): User!
   }
 
+  type LoadMetrics {
+    file_name: String
+    no_loaded: Int
+    no_errors: Int
+  }
+
   type Location {
     id: Int
     name: String
@@ -22,6 +28,7 @@ const typeDefs = gql`
   type Mutation {
     login (email: String!): String,
     logoff: Boolean,
+    loadCountries: String
   }
 `;
 

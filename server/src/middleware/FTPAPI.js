@@ -6,8 +6,8 @@ class FTPAPI {
   constructor(connectionOptions) {
     this.host_url = connectionOptions.host_url;
     this.host_port = connectionOptions.host_port;
-    this.user = connectionOptions.userName;
-    this.password = connectionOptions.userPassword;
+    this.user = connectionOptions.user;
+    this.password = connectionOptions.password;
     this.ftpClient = new FTPClient();
   }
 
