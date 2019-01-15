@@ -49,7 +49,7 @@ class Country extends DataSource {
     .then( (countries) => {
       const countriesJSON = this.convertStringToJSON(countries);
       process.env.NODE_ENV === 'production' ? null : console.log('extractCountriesFromGhcnd - countries: ', countriesJSON);
-      return JSON.parse(countriesJSON);
+      return countriesJSON.toString();
     });
   }
 
@@ -58,9 +58,9 @@ class Country extends DataSource {
       const firstSpace = currentEntry.indexOf(' ');
       const countryCode = currentEntry.slice(0, firstSpace);
       const countryName = currentEntry.slice(firstSpace+1);
-      return `{code: '${countryCode}', name: '${countryName}'}`;
+      return { code: countryCode, name: countryName };
     }));
-    return JSON.parse(countriesArray);
+    return JSON.parse(JSON.stringify(countriesArray));
   }
 
 }
