@@ -28,20 +28,39 @@ class Country extends DataSource {
    * @memberof Location
    */
   async extractCountriesFromGhcnd() {
-    let countries = null;
     const ftpSession = this.context.dataSources.ftpSession;
-    ftpSession.connect()
-    .then(() => {
-      return ftpSession.getFile(`${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`);
-    })  
-    .then(stream => {
-      console.log("File contents: ");
-      countries = stream.read();
-      console.log('countries: ', countries);
-      ftpSession.disconnect();
+    return new Promise(function (resolve, reject) {
+      ftpSession.connect()
+      .then(() => {
+        return ftpSession.getFile(`${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`);
+      })  
+      .then(stream => {
+        let countries = '';
+        stream.on('readable', function() {
+          let data;
+          while (data = this.read()) {
+            countries += data.toString();
+          }
+          resolve(countries);
+          ftpSession.disconnect();
+        });
+      });
+    })
+    .then( (countries) => {
+      const countriesJSON = this.convertStringToJSON(countries);
+      process.env.NODE_ENV === 'production' ? null : console.log('extractCountriesFromGhcnd - countries: ', countriesJSON);
+      return JSON.parse(countriesJSON);
     });
-    process.env.NODE_ENV === 'production' ? null : console.log('extractCountriesFromGhcnd - counties: ', countries);
-    return countries;
+  }
+
+  convertStringToJSON(countries) {
+    const countriesArray = countries.split('\n').map((currentEntry => {
+      const firstSpace = currentEntry.indexOf(' ');
+      const countryCode = currentEntry.slice(0, firstSpace);
+      const countryName = currentEntry.slice(firstSpace+1);
+      return `{code: '${countryCode}', name: '${countryName}'}`;
+    }));
+    return JSON.parse(countriesArray);
   }
 
 }
