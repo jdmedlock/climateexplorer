@@ -3,9 +3,15 @@ import { gql } from 'apollo-server';
 // GraphQL Schema defining the Climate Explorer API
 const typeDefs = gql`
   type Query {
+    countries: [Country]
     me: User!
     locations: [Location!]
     user (email: String!): User!
+  }
+
+  type Country {
+    code: String
+    name: String
   }
 
   type LoadMetrics {
@@ -28,7 +34,7 @@ const typeDefs = gql`
   type Mutation {
     login (email: String!): String,
     logoff: Boolean,
-    loadCountries: String
+    loadCountries: [Country]
   }
 `;
 

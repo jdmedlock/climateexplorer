@@ -47,20 +47,22 @@ class Country extends DataSource {
       });
     })
     .then( (countries) => {
-      const countriesJSON = this.convertStringToJSON(countries);
+      const countriesObject = this.convertStringToObject(countries);
       process.env.NODE_ENV === 'production' ? null : console.log('extractCountriesFromGhcnd - countries: ', countriesJSON);
-      return countriesJSON.toString();
+      return countriesObject;
     });
   }
 
-  convertStringToJSON(countries) {
+  // Convert a country entries from the format `code name` to an object
+  // of the format `{code: '...', name: '...'}`
+  convertStringToObject(countries) {
     const countriesArray = countries.split('\n').map((currentEntry => {
       const firstSpace = currentEntry.indexOf(' ');
       const countryCode = currentEntry.slice(0, firstSpace);
       const countryName = currentEntry.slice(firstSpace+1);
       return { code: countryCode, name: countryName };
     }));
-    return JSON.parse(JSON.stringify(countriesArray));
+    return countriesArray;
   }
 
 }

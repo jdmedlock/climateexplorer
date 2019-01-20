@@ -1,5 +1,9 @@
 module.exports = {
   Query: {
+    countries: async (_, __, { dataSources }) => {
+      return await dataSources.country.extractCountriesFromGhcnd();
+    },
+
     me: async (_, __, { dataSources }) => {
       return dataSources.user.findUserByEmail("joe@gmail.com");
     },
