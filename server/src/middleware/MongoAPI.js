@@ -59,6 +59,12 @@ class MongoAPI {
     return document;
   }
 
+  async insertOne(collectionName, data) {
+    this.connect();
+    const result = this.db.collection(collectionName).insertOne(data);
+    return result;
+  }
+
 }
 
 export default MongoAPI;

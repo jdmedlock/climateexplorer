@@ -5,8 +5,10 @@ class Country extends DataSource {
    * Creates an instance of User
    * @memberof Location
    */
-  constructor() {
+  constructor(mongoAPI) {
     super();
+    this.mongoAPI = mongoAPI;
+
     this.context = null;
   }
 
@@ -32,7 +34,9 @@ class Country extends DataSource {
     return new Promise(function (resolve, reject) {
       ftpSession.connect()
       .then(() => {
-        return ftpSession.getFile(`${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`);
+        return ftpSession.getFile(
+          `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`
+        );
       })  
       .then(stream => {
         let countries = '';
@@ -47,15 +51,15 @@ class Country extends DataSource {
       });
     })
     .then( (countries) => {
-      const countriesObject = this.convertStringToObject(countries);
-      process.env.NODE_ENV === 'production' ? null : console.log('extractCountriesFromGhcnd - countries: ', countriesJSON);
+      const countriesObject = this.convertToObject(countries);
+      // process.env.NODE_ENV === 'production' ? null : console.log('extractCountriesFromGhcnd - countries: ', countriesJSON);
       return countriesObject;
     });
   }
 
   // Convert a country entries from the format `code name` to an object
   // of the format `{code: '...', name: '...'}`
-  convertStringToObject(countries) {
+  convertToObject(countries) {
     const countriesArray = countries.split('\n').map((currentEntry => {
       const firstSpace = currentEntry.indexOf(' ');
       const countryCode = currentEntry.slice(0, firstSpace);
@@ -65,6 +69,11 @@ class Country extends DataSource {
     return countriesArray;
   }
 
+  loadCountries(countries) {
+    countries.map(countryData => {
+      this.mongoAPI.insertOne('countries', countryData);
+    });
+  }
 }
 
 module.exports = Country;
