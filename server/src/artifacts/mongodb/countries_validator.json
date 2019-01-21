@@ -8,6 +8,7 @@
 			"properties" : {
 				"code" : {
 					"bsonType" : "string",
+					"pattern" : "/^[a-z]{2}$/i",
 					"description" : "must be a two character string and is required"
 				},
 				"name" : {

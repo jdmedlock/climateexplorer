@@ -69,10 +69,11 @@ class Country extends DataSource {
     return countriesArray;
   }
 
-  loadCountries(countries) {
-    countries.map(countryData => {
-      this.mongoAPI.insertOne('countries', countryData);
-    });
+  async loadCountries(countries) {
+    for (let countryData of countries) {
+      const result = await this.mongoAPI.insertOne('countries', countryData);
+      console.log('loadCountries - result: ', result);
+    }
   }
 }
 

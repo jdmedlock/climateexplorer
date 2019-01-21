@@ -61,7 +61,8 @@ class MongoAPI {
 
   async insertOne(collectionName, data) {
     this.connect();
-    const result = this.db.collection(collectionName).insertOne(data);
+    const result = await this.db.collection(collectionName).insertOne(data);
+    console.log('insertOne result: ', result);
     return result;
   }
 
