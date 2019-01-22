@@ -3,7 +3,7 @@ import { DataSource } from 'apollo-datasource';
 class Country extends DataSource {
   /**
    * Creates an instance of User
-   * @memberof Location
+   * @memberof Country
    */
   constructor(mongoAPI) {
     super();
@@ -18,16 +18,33 @@ class Country extends DataSource {
    * making requests.
    * @param {*} config DataSource configuration including things like caches
    * and context
-   * @memberof Location
+   * @memberof Country
    */
   initialize(config) {
     this.context = config.context;
   }
 
   /**
+   * Convert an array of country entries from strings to objects.
+   * @param {[String]} Array of countries. Entries are strings consisting of a
+   * space separated country code and name.
+   * @returns Array of country objects in the format `{code: country-code, name: country-name}`
+   * @memberof Country
+   */
+  convertToObject(countries) {
+    const countriesArray = countries.split('\n').map((currentEntry => {
+      const firstSpace = currentEntry.indexOf(' ');
+      const countryCode = currentEntry.slice(0, firstSpace);
+      const countryName = currentEntry.slice(firstSpace+1);
+      return { code: countryCode, name: countryName };
+    }));
+    return countriesArray;
+  }
+
+  /**
    * Extract countries from the Global Historical Climatology Network . 
-   * @returns {Object[]} Object containing coun
-   * @memberof Location
+   * @returns {[Object]} Array of objects containing country codes and names
+   * @memberof Country
    */
   async extractCountriesFromGhcnd() {
     const ftpSession = this.context.dataSources.ftpSession;
@@ -48,33 +65,37 @@ class Country extends DataSource {
           resolve(countries);
           ftpSession.disconnect();
         });
+      })
+      .catch(err => {
+        throw new Error('FTP from NOAA failed.')
       });
     })
-    .then( (countries) => {
+    .then(countries => {
       const countriesObject = this.convertToObject(countries);
       // process.env.NODE_ENV === 'production' ? null : console.log('extractCountriesFromGhcnd - countries: ', countriesJSON);
       return countriesObject;
+    })
+    .catch(err => {
+      throw new Error('FTP from NOAA failed.');
     });
   }
 
-  // Convert a country entries from the format `code name` to an object
-  // of the format `{code: '...', name: '...'}`
-  convertToObject(countries) {
-    const countriesArray = countries.split('\n').map((currentEntry => {
-      const firstSpace = currentEntry.indexOf(' ');
-      const countryCode = currentEntry.slice(0, firstSpace);
-      const countryName = currentEntry.slice(firstSpace+1);
-      return { code: countryCode, name: countryName };
-    }));
-    return countriesArray;
-  }
-
+  /**
+   * Replace the current country collection with new country documents. 
+   * @param {[Object]} Array of objects containing the country codes and names.
+   * @memberof Country
+   */
   async loadCountries(countries) {
     const deleteResult = await this.mongoAPI.deleteAll('countries');
-    console.log('Country - loadCountries - deleteResult: ', deleteResult);
-    for (let countryData of countries) {
-      const insertResult = await this.mongoAPI.insertOne('countries', countryData);
-      console.log('loadCountries - result: ', insertResult);
+    if (deleteResult && deleteResult.status === 'successful') {
+      for (let countryData of countries) {
+        const insertResult = await this.mongoAPI.insertOne('countries', countryData);
+        if (insertResult && insertResult.status !== 'successful') {
+          throw new Error('Unsuccessful insert of countries documents. insertResult: ', insertResult);
+        }
+      }
+    } else {
+      throw new Error('Unsuccessful delete of countries documents. deleteResult: ', deleteResult);
     }
   }
 }

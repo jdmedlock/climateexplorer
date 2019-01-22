@@ -29,7 +29,6 @@ module.exports = {
     },
     loadCountries: async (_, __, { dataSources }) => {
       const countries = await dataSources.country.extractCountriesFromGhcnd();
-      console.log('loadCountries - countries: ', countries);
       await dataSources.country.loadCountries(countries);
       return countries;
     }
