@@ -46,6 +46,17 @@ class MongoAPI {
     await this.client.close();
   }
 
+  async deleteAll(collectionName) {
+    this.connect();
+    const result = await this.db.collection(collectionName).deleteMany({});
+    const deleteResult = {
+      status: result.result.ok === 1 ? 'successful' : 'failed',
+      documentCount: result.deletedCount
+    };
+    console.log('MongoAPI - deleteAll - deleteResult: ', deleteResult);
+    return deleteResult;
+  }
+
   /**
    * Retrieve a single document from the database.
    * @param {*} collectionName
@@ -56,14 +67,22 @@ class MongoAPI {
   async findOne(collectionName, query) {
     this.connect();
     const document = await this.db.collection(collectionName).findOne(query);
+    console.log('document: ', document);
     return document;
   }
 
   async insertOne(collectionName, data) {
     this.connect();
     const result = await this.db.collection(collectionName).insertOne(data);
-    console.log('insertOne result: ', result);
-    return result;
+    const insertResult = {
+      status: result.result.ok === 1 ? 'successful' : 'failed',
+      documentCount: result.insertedCount,
+      id: result.insertedId,
+      code: result.ops[0].code,
+      name: result.ops[0].name
+    };
+    console.log('insertOne insertResult: ', insertResult);
+    return insertResult;
   }
 
 }

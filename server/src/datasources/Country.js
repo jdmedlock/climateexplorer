@@ -70,9 +70,11 @@ class Country extends DataSource {
   }
 
   async loadCountries(countries) {
+    const deleteResult = await this.mongoAPI.deleteAll('countries');
+    console.log('Country - loadCountries - deleteResult: ', deleteResult);
     for (let countryData of countries) {
-      const result = await this.mongoAPI.insertOne('countries', countryData);
-      console.log('loadCountries - result: ', result);
+      const insertResult = await this.mongoAPI.insertOne('countries', countryData);
+      console.log('loadCountries - result: ', insertResult);
     }
   }
 }
