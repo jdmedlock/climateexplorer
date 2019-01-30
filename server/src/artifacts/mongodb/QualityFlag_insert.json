@@ -1,0 +1,17 @@
+db.QualityFlag.insert([
+  { code: " ", description: "did not fail any quality assurance check" },
+  { code: "D", description: "failed duplicate check" },
+  { code: "G", description: "failed gap check" },
+  { code: "I", description: "failed internal consistency check" },
+  { code: "K", description: "failed streak/frequent-value check" },
+  { code: "L", description: "failed check on length of multiday period" },
+  { code: "M", description: "failed megaconsistency check" },
+  { code: "N", description: "failed naught check" },
+  { code: "O", description: "failed climatological outlier check" },
+  { code: "R", description: "failed lagged range check" },
+  { code: "S", description: "failed spatial consistency check" },
+  { code: "T", description: "failed temporal consistency check" },
+  { code: "W", description: "temperature too warm for snow" },
+  { code: "X", description: "failed bounds check" },
+  { code: "Z", description: "flagged as a result of an official Datzilla investigation" },
+])

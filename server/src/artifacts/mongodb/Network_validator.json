@@ -3,17 +3,17 @@
 		"$jsonSchema" : {
 			"bsonType" : "object",
 			"required" : [
-				"name"
+				"code", "description"
 			],
 			"properties" : {
 				"code" : {
 					"bsonType" : "string",
-					"pattern" : "/^[a-z]{2}$/i",
-					"description" : "must be a two character string and is required"
+					"maxLength" : 1,
+					"description" : "must be a string of length 1 and is required"
 				},
-				"name" : {
+				"description" : {
 					"bsonType" : "string",
-					"description" : "must be a string of up to 47 characters and is required"
+					"description" : "must be a string and is required"
 				}
 			}
 		}

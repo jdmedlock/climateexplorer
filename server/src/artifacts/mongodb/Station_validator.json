@@ -1,0 +1,64 @@
+{
+  validator: {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "required": [
+        "code",
+        "name"
+      ],
+      "properties": {
+        "country_code": {
+          "bsonType": "string",
+          "maxLength": 2,
+          "description": "FIPS country code, must be a string of length 2 and is required"
+        },
+        "network_code": {
+          "bsonType": "string",
+          "maxLength": 1,
+          "description": "network code that identifies the station numbering system used, must be a string of length 1 and is required"
+        },
+        "station_id": {
+          "bsonType": "string",
+          "maxLength": 8,
+          "description": "station identifier, must be a string of length 8 and is required"
+        },
+        "latitude": {
+          "bsonType": "number",
+          "description": "is latitude of the station (in decimal degrees), must be a number and is required"
+        },
+        "longitude": {
+          "bsonType": "number",
+          "description": "is longitude of the station (in decimal degrees), must be a number and is required"
+        },
+        "elevation": {
+          "bsonType": "number",
+          "description": "is the elevation of the station (in meters, missing = -999.9), must be a number and is required"
+        },
+        "state_code": {
+          "bsonType": "string",
+          "maxLength": 2,
+          "description": "is the U.S. postal code for the state (for U.S. stations only), must be a string of length 2 and is required"
+        },
+        "name": {
+          "bsonType": "string",
+          "description": "is the name of the station, must be a string and is required"
+        },
+        "gsn_flag": {
+          "bsonType": "string",
+          "maxLength": 3,
+          "description": "is a flag that indicates whether the station is part of the GCOS Surface Network (GSN). The flag is assigned by cross-referencing the number in the WMOID field with the official list of GSN stations. There are two possible values - Blank = non-GSN station or WMO Station number not available; GSN   = GSN station, must be a string of length 3 and is required"
+        },
+        "hcn_crn_flag": {
+          "bsonType": "string",
+          "maxLength": 3,
+          "description": "is a flag that indicates whether the station is part of the U.S. CRN FLAG  Historical Climatology Network (HCN) or U.S. Climate Refererence Network (CRN).  There are three possible values: Blank = Not a member of the U.S. Historical Climatology or U.S. Climate Reference Networks, HCN = U.S. Historical Climatology Network station; CRN = U.S. Climate Reference Network or U.S. Regional Climate Network Station, must be a string of length 3 and is required"
+        },
+        "wmo_id": {
+          "bsonType": "string",
+          "maxLength": 5,
+          "description": "is the World Meteorological Organization (WMO) number for the station. If the station has no WMO number (or one has not yet been matched to this station), then the field is blank, must be a string of length 5 and is required"
+        }
+      }
+    }
+  }
+}

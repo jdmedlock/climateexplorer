@@ -1,0 +1,73 @@
+const validator={
+	$jsonSchema : {
+		bsonType : "object",
+		required : [
+			"country_code",
+			"network_code",
+			"station_id",
+			"year",
+			"month",
+			"element_type",
+			"measurement_flag",
+			"quality_flag",
+			"source_flag",
+			"measurement_value"
+		],
+		properties : {
+			country_code : {
+				bsonType : "string",
+				maxLength : 2,
+				description : "FIPS country code, must be a string of length 2 and is required"
+			},
+			network_code : {
+				bsonType : "string",
+				maxLength : 1,
+				description : "network code that identifies the station numbering system used, must be a string of length 1 and is required"
+			},
+			station_id : {
+				bsonType : "string",
+				maxLength : 8,
+				description : "station identifier, must be a string of length 8 and is required"
+			},
+			year : {
+				bsonType : "number",
+				description : "is the year of the record., must be a number and is required"
+			},
+			month : {
+				bsonType : "number",
+				description : "is the month of the record, must be a number and is required"
+			},
+			element_type : {
+				bsonType : "string",
+				maxLength : 4,
+				description : "is the element type., must be a string of length 4 and is required"
+			},
+			measurement_flag: {
+				bsonType : "string",
+				maxLength : 1,
+				description : "qualifies the measurement, must be a string of length 1 and is required"
+			},
+			quality_flag: {
+				bsonType : "string",
+				maxLength : 1,
+				description : "is the quality for the measurement, must be a string of length 1 and is required"
+			},
+			source_flag: {
+				bsonType : "string",
+				maxLength : 1,
+				description : "is the source for the measurement, must be a string of length 1 and is required"
+			},
+			measurement_value: {
+				bsonType : "number",
+				description : "is the value for this observation (missing = -9999), must be a number and is required"
+			}
+		}
+	}
+};
+
+db.runCommand( {
+  collMod: "Observation",
+  validator,
+  validationLevel: "moderate", //off | strict
+  //validationAction: "warn" |"error"
+})

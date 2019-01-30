@@ -1,0 +1,30 @@
+{
+	"validator" : {
+		"$jsonSchema" : {
+			"bsonType" : "object",
+			"required" : [
+				"category",
+				"type",
+				"description"
+			],
+			"properties" : {
+				"category" : {
+					"bsonType" : "string",
+					"maxLength" : 5,
+					"description" : "must be a five character string defining the type as 'core' or 'other' and is required"
+				},
+				"type" : {
+					"bsonType" : "string",
+					"maxLength" : 4,
+					"description" : "must be a string of up to 4 characters and is required"
+				},
+				"description" : {
+					"bsonType" : "string",
+					"description" : "must be a string describing the element type and is required"
+				}
+			}
+		}
+	},
+	"validationLevel" : "moderate",
+	"validationAction" : "error"
+}
