@@ -12,3 +12,17 @@ To create a service that automatically starts it at login time
 
 Note that monitoring and manual inspection of data is being performed using
 MongoDB Compass.
+
+## Starting MongoDB
+
+1. Open a terminal session
+2. Enter the command: `mongod`
+
+## Starting PostgreSQL
+
+1. Open a terminal session
+2. Enter the commands:
+   ```
+   sudo -u postgres -i
+   /Library/PostgreSQL/11/bin/pg_ctl start -D /data/pg
+   ```
