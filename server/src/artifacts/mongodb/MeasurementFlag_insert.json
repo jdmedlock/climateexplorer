@@ -1,0 +1,13 @@
+db.MeasurementFlag.insert([
+  { code: " ", description: "no measurement information applicable" },
+  { code: "B", description: "precipitation total formed from two 12-hour totals" },
+  { code: "D", description: "precipitation total formed from four six-hour totals" },
+  { code: "H", description: "represents highest or lowest hourly temperature (TMAX or TMIN) or the average of hourly values (TAVG)" },
+  { code: "K", description: "converted from knots" },
+  { code: "L", description: "temperature appears to be lagged with respect to reported hour of observation" },
+  { code: "O", description: "converted from oktas" },
+  { code: "P", description: "identified as 'missing presumed zero' in DSI 3200 and 3206" },
+  { code: "T", description: "trace of precipitation, snowfall, or snow depth" },
+  { code: "W", description: "converted from 16-point WBAN code (for wind direction)" },
+
+])

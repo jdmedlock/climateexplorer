@@ -11,3 +11,10 @@ export const LOGOFF_USER = gql`
     logoff
   }
 `;
+
+
+export const EXTRACT_COUNTIES = gql`
+  mutation extractCountries {
+    extractCountries
+  }
+`;

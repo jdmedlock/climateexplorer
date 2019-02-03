@@ -30,7 +30,6 @@ class MongoAPI {
       this.db = await this.client.db(dbName);
       console.log(`Connected to Mongodb! - ${process.env.MONGODB_URL}`);
     } catch (err) {
-      console.log(err.stack);
       throw new Error('Unable to connect to MongoDB');
     }
   };
@@ -45,6 +44,21 @@ class MongoAPI {
     }
     await this.client.close();
   }
+/**
+ * Delete all documents in a collection
+ * @param {String} collectionName Collection name
+ * @returns Result of the deletion
+ * @memberof MongoAPI
+ */
+async deleteAll(collectionName) {
+    this.connect();
+    const result = await this.db.collection(collectionName).deleteMany({});
+    const deleteResult = {
+      status: result.result.ok === 1 ? 'successful' : 'failed',
+      documentCount: result.deletedCount
+    };
+    return deleteResult;
+  }
 
   /**
    * Retrieve a single document from the database.
@@ -57,6 +71,25 @@ class MongoAPI {
     this.connect();
     const document = await this.db.collection(collectionName).findOne(query);
     return document;
+  }
+/**
+ * Insert a new document into a collection
+ * @param {String} collectionName Collection name
+ * @param {Object} document Document to be inserted
+ * @returns Result of the insersion
+ * @memberof MongoAPI
+ */
+async insertOne(collectionName, document) {
+    this.connect();
+    const result = await this.db.collection(collectionName).insertOne(document);
+    const insertResult = {
+      status: result.result.ok === 1 ? 'successful' : 'failed',
+      documentCount: result.insertedCount,
+      id: result.insertedId,
+      code: result.ops[0].code,
+      name: result.ops[0].name
+    };
+    return insertResult;
   }
 
 }
