@@ -48,8 +48,8 @@ class Country extends DataSource {
    */
   async extractCountriesFromGhcnd() {
     const ftpSession = this.context.dataSources.ftpSession;
-    return new Promise(function (resolve, reject) {
-      ftpSession.connect()
+    return new Promise(async (resolve, reject) => {
+      await ftpSession.connect()
       .then(() => {
         return ftpSession.getFile(
           `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`
@@ -63,7 +63,6 @@ class Country extends DataSource {
             countries += data.toString();
           }
           resolve(countries);
-          ftpSession.disconnect();
         });
       })
       .catch(err => {

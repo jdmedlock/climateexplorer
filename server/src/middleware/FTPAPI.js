@@ -8,11 +8,12 @@ class FTPAPI {
     this.host_port = connectionOptions.host_port;
     this.user = connectionOptions.user;
     this.password = connectionOptions.password;
-    this.ftpClient = new FTPClient();
+    this.ftpClient = null;
   }
 
-  connect() {
+  async connect() {
     console.log('Attempting to connect...');
+    this.ftpClient = new FTPClient();
     return this.ftpClient.connect( {
       host: this.host_url,
       port: this.host_port,
@@ -21,8 +22,9 @@ class FTPAPI {
     });
   }
 
-  disconnect() {
-    return this.ftpClient.end();
+  async disconnect() {
+    console.log('Attempting to disconnect...');
+    return await this.ftpClient.end();
   }
 
   getDirectory(directoryName) {
