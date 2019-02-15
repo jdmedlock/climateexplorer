@@ -207,6 +207,18 @@ CREATE TABLE ce."Station" (
 ALTER TABLE ce."Station" OWNER TO postgres;
 
 --
+-- Name: User; Type: TABLE; Schema: ce; Owner: postgres
+--
+
+CREATE TABLE ce."User" (
+    name character varying(64) NOT NULL,
+    email character varying(128) NOT NULL
+);
+
+
+ALTER TABLE ce."User" OWNER TO postgres;
+
+--
 -- Name: locations; Type: TABLE; Schema: ce; Owner: postgres
 --
 
@@ -286,6 +298,15 @@ COMMENT ON TABLE ce.locations IS 'Table used for testing the PostgreSQL configur
 
 
 --
+-- Data for Name: User; Type: TABLE DATA; Schema: ce; Owner: postgres
+--
+
+INSERT INTO ce."User" VALUES ('Fred Farkle', 'fred@hotmail.com');
+INSERT INTO ce."User" VALUES ('Jane Doe', 'jane@gmail.com');
+INSERT INTO ce."User" VALUES ('Joe User', 'joe@gmail.com');
+
+
+--
 -- Data for Name: locations; Type: TABLE DATA; Schema: ce; Owner: postgres
 --
 
@@ -357,6 +378,22 @@ ALTER TABLE ONLY ce."SourceFlag"
 
 ALTER TABLE ONLY ce."State"
     ADD CONSTRAINT "unique_State_code" UNIQUE (code);
+
+
+--
+-- Name: User unique_User_email; Type: CONSTRAINT; Schema: ce; Owner: postgres
+--
+
+ALTER TABLE ONLY ce."User"
+    ADD CONSTRAINT "unique_User_email" UNIQUE (email);
+
+
+--
+-- Name: User unique_User_name; Type: CONSTRAINT; Schema: ce; Owner: postgres
+--
+
+ALTER TABLE ONLY ce."User"
+    ADD CONSTRAINT "unique_User_name" UNIQUE (name);
 
 
 --
@@ -500,6 +537,20 @@ COMMENT ON INDEX ce.index_station_pk IS 'Primary index on country_code, network_
 
 
 --
+-- Name: index_user_email; Type: INDEX; Schema: ce; Owner: postgres
+--
+
+CREATE UNIQUE INDEX index_user_email ON ce."User" USING btree (email);
+
+
+--
+-- Name: index_user_pk; Type: INDEX; Schema: ce; Owner: postgres
+--
+
+CREATE UNIQUE INDEX index_user_pk ON ce."User" USING btree (name);
+
+
+--
 -- Name: Station lnk_Country_Station; Type: FK CONSTRAINT; Schema: ce; Owner: postgres
 --
 
@@ -574,4 +625,3 @@ ALTER TABLE ONLY ce."Observation"
 --
 -- PostgreSQL database dump complete
 --
-
