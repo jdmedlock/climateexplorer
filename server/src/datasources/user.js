@@ -7,9 +7,9 @@ class User extends DataSource {
    * @param {*} mongoAPI Object containing Mongo access functions 
    * @memberof User
    */
-  constructor(mongoAPI) {
+  constructor(postgresAPI) {
     super();
-    this.mongoAPI = mongoAPI;
+    this.postgresAPI = postgresAPI;
     this.context = null;
   }
 
@@ -38,8 +38,7 @@ class User extends DataSource {
     if (!email || !isEmail.validate(email)) {
       return null;
     }
-
-    const user = await this.mongoAPI.findOne('users', { email: email });
+    const user = await this.postgresAPI.select(process.env.PG_CONNECTION_SCHEMA, 'User', `email = '${email}' `);
     process.env.NODE_ENV === 'production' ? null : console.log('findUserByEmail - user: ', user);
     return user;
   }

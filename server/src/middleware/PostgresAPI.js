@@ -44,6 +44,14 @@ class PostgresAPI {
 
   }
 
+  async select(schemaName, tableName, predicates) {
+    this.connect();
+    const resultSet = await this.pool.query(
+      `SELECT * FROM ${schemaName}."${tableName}" WHERE ${predicates}`
+    );
+    return resultSet.rows;
+  }
+
   /**
    * Retrieve an entire table from the database.
    * @param {*} tableName
@@ -52,10 +60,10 @@ class PostgresAPI {
    */
   async selectAll(schemaName, tableName) {
     this.connect();
-    const locations = await this.pool.query(
+    const resultSet = await this.pool.query(
       `SELECT * FROM ${schemaName}.${tableName}`
     );
-    return locations.rows;
+    return resultSet.rows;
   }
 
 }

@@ -27,7 +27,7 @@ const mongo = new MongoAPI();
 const postgres = new PostgresAPI();
 const country = new Country(mongo);
 const location = new Location(postgres);
-const user = new User(mongo);
+const user = new User(postgres);
 
 const dataSources = () => ({
   ftpSession: ftpSession,
