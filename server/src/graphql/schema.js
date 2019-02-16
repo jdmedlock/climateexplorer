@@ -5,7 +5,6 @@ const typeDefs = gql`
   type Query {
     countries: [Country]
     me: User!
-    locations: [Location!]
     user (email: String!): User!
   }
 
@@ -18,11 +17,6 @@ const typeDefs = gql`
     file_name: String
     no_loaded: Int
     no_errors: Int
-  }
-
-  type Location {
-    id: Int
-    name: String
   }
 
   type User {

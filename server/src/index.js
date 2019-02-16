@@ -7,7 +7,6 @@ import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers.js';
 
 import Country from './datasources/Country';
-import Location from './datasources/Location';
 import User from './datasources/User';
 import FTPAPI from './middleware/FTPAPI';
 import MongoAPI from './middleware/MongoAPI';
@@ -26,13 +25,11 @@ const ftpSession = new FTPAPI( {
 const mongo = new MongoAPI();
 const postgres = new PostgresAPI();
 const country = new Country(mongo);
-const location = new Location(postgres);
 const user = new User(postgres);
 
 const dataSources = () => ({
   ftpSession: ftpSession,
   country : country,
-  location: location,
   user: user,
 });
 

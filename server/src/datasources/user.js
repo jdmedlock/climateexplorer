@@ -17,8 +17,8 @@ class User extends DataSource {
    * `initialize` is called by ApolloServer as part of its setup process. We'll 
    * assign the request context to this object, so we can know about the user
    * making requests.
-   * @param {*} config DataSource configuration including things like caches
-   * and context
+   * @param {object} config DataSource configuration including elements like
+   * caches and context
    * @memberof User
    */
   initialize(config) {
@@ -29,7 +29,7 @@ class User extends DataSource {
    * Retrieve a single user based on the email address that is provided when
    * invoked. If the user is already on the context, that users email address
    * will be used instead of `emailArg`.
-   * @param {*} emailArg Email address of the user
+   * @param {string} emailArg Email address of the user
    * @returns User object retrieved from the database
    * @memberof User
    */
@@ -40,9 +40,8 @@ class User extends DataSource {
     }
     const user = await this.postgresAPI.select(process.env.PG_CONNECTION_SCHEMA, 'User', `email = '${email}' `);
     process.env.NODE_ENV === 'production' ? null : console.log('findUserByEmail - user: ', user);
-    return user;
+    return user[0];
   }
-
 }
 
 module.exports = User;

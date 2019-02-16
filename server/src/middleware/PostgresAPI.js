@@ -44,6 +44,14 @@ class PostgresAPI {
 
   }
 
+  /**
+   * Retrieve rows from a table based on a set of WHERE-clause predicates.
+   * @param {string} schemaName Schema name
+   * @param {string} tableName Table name
+   * @param {string} predicates Where-clause predicatees
+   * @returns Matching rows or null if none found.
+   * @memberof PostgresAPI
+   */
   async select(schemaName, tableName, predicates) {
     this.connect();
     const resultSet = await this.pool.query(
@@ -54,14 +62,15 @@ class PostgresAPI {
 
   /**
    * Retrieve an entire table from the database.
-   * @param {*} tableName
+   * @param {string} schemaName Schema name
+   * @param {string} tableName Table name
    * @returns Matching rows or null if none found.
    * @memberof PostgresAPI
    */
   async selectAll(schemaName, tableName) {
     this.connect();
     const resultSet = await this.pool.query(
-      `SELECT * FROM ${schemaName}.${tableName}`
+      `SELECT * FROM ${schemaName}."${tableName}"`
     );
     return resultSet.rows;
   }
