@@ -1,4 +1,6 @@
+// -----
 // GraphQL Query Functions
+// -----
 
 /**
  * Retrieve the currently authenticated user from the database

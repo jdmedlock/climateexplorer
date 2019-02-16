@@ -1,4 +1,7 @@
+// -----
 // GraphQL Mutation Functions
+// -----
+
 const login = async (_, { email }, { dataSources }) => {
   const user = await dataSources.user.findUserByEmail(email);
   if (user) {
