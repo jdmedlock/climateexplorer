@@ -1,4 +1,5 @@
 import { login, logoff } from './resolvers/Authentication';
+import { extract } from './resolvers/Extract';
 import { countries, loadCountries } from './resolvers/Country';
 import { me, user } from './resolvers/User';
 
@@ -9,6 +10,7 @@ module.exports = {
     user: user,
   },
   Mutation: {
+    extract: extract,
     login: login,
     logoff: logoff,
     loadCountries: loadCountries
