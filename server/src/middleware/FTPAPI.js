@@ -47,10 +47,13 @@ class FTPAPI {
    */
   async getDirectory(directoryName) {
     await this.connect();
-    return await this.ftpClient.list(directoryName);
+    const directoryList = await this.ftpClient.list(directoryName);
+    await this.disconnect();
+    return directoryList
   }
  
-  getFile(fileName) {
+  async getFile(fileName) {
+    await this.connect();
     return new Promise((resolve,reject) => {
       this.ftpClient.get(fileName)
       .then((stream) => {
@@ -58,6 +61,7 @@ class FTPAPI {
           stream.once('close', resolve);
           stream.once('error', reject);
           resolve(stream);
+          this.disconnect();
         });
       })
       .then((stream) => {

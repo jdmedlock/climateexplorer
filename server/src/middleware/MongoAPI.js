@@ -5,7 +5,6 @@ class MongoAPI {
   constructor() {
     this.client = null;
     this.db = null;
-    this.connect();
   }
 
   /**
@@ -18,6 +17,7 @@ class MongoAPI {
   async connect() {
     // Return immediately if a connection has already been established.
     if (this.client) {
+      console.log('connect - client already connected ');
       return;
     }
 
@@ -44,13 +44,14 @@ class MongoAPI {
     }
     await this.client.close();
   }
-/**
- * Delete all documents in a collection
- * @param {String} collectionName Collection name
- * @returns Result of the deletion
- * @memberof MongoAPI
- */
-async deleteAll(collectionName) {
+
+  /**
+   * Delete all documents in a collection
+   * @param {String} collectionName Collection name
+   * @returns Result of the deletion
+   * @memberof MongoAPI
+   */
+  async deleteAll(collectionName) {
     this.connect();
     const result = await this.db.collection(collectionName).deleteMany({});
     const deleteResult = {
@@ -61,9 +62,25 @@ async deleteAll(collectionName) {
   }
 
   /**
+   * Retrieve a single document with the highest value as defined by the 
+   * sort criteria.
+   * @param {string} collectionName
+   * @param {object} sortCriteria
+   * @param {object} query
+   * @returns Matching document or null if none found.
+   * @memberof MongoAPI
+   */
+  async findMax(collectionName, sortCriteria, query) {
+    await this.connect();
+    const cursor = await this.db.collection(collectionName).find(query).sort(sortCriteria).limit(1);
+    const document = await cursor.hasNext() ? await cursor.next() : null;
+    return document;
+  }
+
+  /**
    * Retrieve a single document from the database.
-   * @param {*} collectionName
-   * @param {*} query
+   * @param {string} collectionName
+   * @param {object} query
    * @returns Matching document or null if none found.
    * @memberof MongoAPI
    */
@@ -72,15 +89,16 @@ async deleteAll(collectionName) {
     const document = await this.db.collection(collectionName).findOne(query);
     return document;
   }
-/**
- * Insert a new document into a collection
- * @param {String} collectionName Collection name
- * @param {Object} document Document to be inserted
- * @returns Result of the insersion
- * @memberof MongoAPI
- */
-async insertOne(collectionName, document) {
-    this.connect();
+
+  /**
+   * Insert a new document into a collection
+   * @param {String} collectionName Collection name
+   * @param {Object} document Document to be inserted
+   * @returns Result of the insersion
+   * @memberof MongoAPI
+   */
+  async insertOne(collectionName, document) {
+    //this.connect();
     const result = await this.db.collection(collectionName).insertOne(document);
     const insertResult = {
       status: result.result.ok === 1 ? 'successful' : 'failed',
