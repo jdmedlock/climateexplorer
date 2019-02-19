@@ -49,23 +49,30 @@ class FTPAPI {
     await this.connect();
     const directoryList = await this.ftpClient.list(directoryName);
     await this.disconnect();
-    return directoryList
+    return directoryList;
   }
- 
+
+  /**
+    * Retrieve a file from the FTP host
+    * @param {string} fileName
+    * @returns {object} Contents of the file
+    * @memberof FTPAPI
+    */
   async getFile(fileName) {
-    await this.connect();
-    return new Promise((resolve,reject) => {
-      this.ftpClient.get(fileName)
-      .then((stream) => {
-        return new Promise(function (resolve, reject) {
-          stream.once('close', resolve);
-          stream.once('error', reject);
-          resolve(stream);
-          this.disconnect();
-        });
-      })
-      .then((stream) => {
-        resolve(stream);
+    let fileContents = '';
+    await this.connect()
+    const stream = await this.ftpClient.get(fileName);
+    console.log('Stream returned: ');
+    return new Promise( (resolve, reject) => {
+      stream.on('readable', async () => {
+        let chunk;
+        while (null !== (chunk = stream.read())) {
+          fileContents += chunk;
+        }
+      });
+      stream.on('end', async () => {
+        await this.disconnect();
+        resolve(fileContents);
       });
     });
   }
