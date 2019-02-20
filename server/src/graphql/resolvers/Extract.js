@@ -39,7 +39,7 @@ const extract = async (_, __, { dataSources }) => {
   );
   console.log('Most recent checkpoint - mostRecentChkpt: ', mostRecentChkpt);
 
-  const fileNameToGet = '';
+  let fileNameToGet = '';
   if (!mostRecentChkpt) {
     // Search the directory list for the oldest file that remains to be extracted.
     // This is the first file for which there's no matching checkpoint.
@@ -64,11 +64,15 @@ const extract = async (_, __, { dataSources }) => {
         break;
       }
     }
+  } else {
+    fileNameToGet = mostRecentChkpt.fileName;
   }
 
   // Retrieve the file using FTP, and add it to the staging database.
-  const fileContents = await dataSources.ftpSession.getFile(fileNameToGet);
-  console.log('file contents: ', fileContents);
+  const fileContents = await dataSources.ftpSession.getFile(
+    `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}/${fileNameToGet}`);
+    console.log('file retrieved. length: ', fileContents.length);
+    console.log('file contents: ', fileContents);
 
   // If successfully added to the staging database update its checkpoint
   // with the extract complete flag enabled
