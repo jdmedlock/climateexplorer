@@ -57,7 +57,7 @@ const extract = async (_, __, { dataSources }) => {
           modificationMonth: checkpointDate.getMonth(),
           modificationDay: checkpointDate.getDate(),
           etlState: "STARTED"
-        }
+        };
         const insertResult = await mongo.insertOne('Checkpoint', checkpointDocument);
         console.log('Checkpoint insert result: ', insertResult);
         fileNameToGet = entry.name;
@@ -73,6 +73,48 @@ const extract = async (_, __, { dataSources }) => {
     `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}/${fileNameToGet}`);
   console.log('file retrieved. length: ', fileContents.length);
   console.log('file contents: ', fileContents);
+
+  const observation = {
+    country_code: fileContents.slice(0, 2),
+		network_code: fileContents.slice(2, 3),
+		station_id: fileContents.slice(3, 11),
+		year: fileContents.slice(11, 15),
+		month: fileContents.slice(15, 17),
+		element_type: fileContents.slice(17, 21)
+  };
+  console.log('observation: ', observation);
+
+  const observations = fileContents.slice(21, 269);
+  // Daily observation field ranges following `slice` bounds rules
+  const valueCols = {start: 0, end: 5};
+  const mflagCols = {start: 5, end: 6};
+  const qflagCols = {start: 6, end: 7};
+  const sflagCols = {start: 7, end: 8};
+
+  const dailyObsStartCol = 21;
+  for (let dayOfMonth = 0; dayOfMonth < 31; dayOfMonth += 1) {
+    const dailyWeather = {
+      country_code: fileContents.slice(0, 2),
+      network_code: fileContents.slice(2, 3),
+      station_id: fileContents.slice(3, 11),
+      year: fileContents.slice(11, 15),
+      month: fileContents.slice(15, 17),
+      element_type: fileContents.slice(17, 21),
+      measurement_flag: fileContents.slice(
+        dailyObsStartCol + (dayOfMonth*mflagCols.start),
+        dailyObsStartCol + (dayOfMonth*mglagCols.end) ),
+      quality_flag: fileContents.slice(
+        dailyObsStartCol + (dayOfMonth*qflagCols.start),
+        dailyObsStartCol + (dayOfMonth*qflagCols.end) ),
+      source_flag: fileContents.slice(
+        dailyObsStartCol + (dayOfMonth*sflagCols.start),
+        dailyObsStartCol + (dayOfMonth*sflagCols.end) ),
+      measurement_value: fileContents.slice(
+        dailyObsStartCol + (dayOfMonth*valueCols.start),
+        dailyObsStartCol + (dayOfMonth*valueCols.end) )
+    };
+    console.log('dailyWeather: ', dailyWeather);
+  }
 
   // If successfully added to the staging database update its checkpoint
   // with the extract complete flag enabled
