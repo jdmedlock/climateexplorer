@@ -74,51 +74,59 @@ const extract = async (_, __, { dataSources }) => {
   console.log('file retrieved. length: ', fileContents.length);
   console.log('file contents: ', fileContents);
 
-  const observation = {
-    country_code: fileContents.slice(0, 2),
-		network_code: fileContents.slice(2, 3),
-		station_id: fileContents.slice(3, 11),
-		year: fileContents.slice(11, 15),
-		month: fileContents.slice(15, 17),
-		element_type: fileContents.slice(17, 21)
-  };
-  console.log('observation: ', observation);
-
-  const observations = fileContents.slice(21, 269);
-  // Daily observation field ranges following `slice` bounds rules
-  const valueCols = {start: 0, end: 5, lth: 5};
-  const mflagCols = {start: 5, end: 6, lth: 1};
-  const qflagCols = {start: 6, end: 7, lth: 1};
-  const sflagCols = {start: 7, end: 8, lth: 1};
-  const totalFieldsLth = sflagCols.end;
-
-  const dailyObsStartCol = 21;
-  console.log('made it here');
-  for (let dayOfMonth = 0; dayOfMonth < 31; dayOfMonth += 1) {
-    console.log('iteration: ', dayOfMonth);
-
-    const valueStart = dailyObsStartCol + (dayOfMonth * totalFieldsLth);
-    const valueEnd = valueStart + valueCols.lth;
-    const mflagStart = valueStart + mflagCols.start;
-    const mflagEnd = mflagStart + mflagCols.lth;
-    const qflagStart = valueStart + qflagCols.start;
-    const qflagEnd = qflagStart + qflagCols.lth;
-    const sflagStart = valueStart + sflagCols.start;
-    const sflagEnd = sflagStart + sflagCols.lth;
-
-    const dailyWeather = {
+  try {
+    const observation = {
       country_code: fileContents.slice(0, 2),
       network_code: fileContents.slice(2, 3),
       station_id: fileContents.slice(3, 11),
       year: fileContents.slice(11, 15),
       month: fileContents.slice(15, 17),
-      element_type: fileContents.slice(17, 21),
-      measurement_flag: fileContents.slice(mflagStart, mflagEnd),
-      quality_flag: fileContents.slice(qflagStart, qflagEnd),
-      source_flag: fileContents.slice(sflagStart, sflagEnd),
-      measurement_value: fileContents.slice(valueStart, valueEnd)
+      element_type: fileContents.slice(17, 21)
     };
-    console.log('dailyWeather: ', dailyWeather);
+    console.log('observation: ', observation);
+    const insertResult = await mongo.insertOne('Observation', observation);
+    console.log('Observation insert result: ', insertResult);
+  } 
+  catch(error) {
+    throw new Error(`Error inserting new Observation document. Error: ${error}`);
+  }
+
+  try {
+    const observations = fileContents.slice(21, 269);
+    // Daily observation field ranges following `slice` bounds rules
+    const valueCols = {start: 0, lth: 5};
+    const mflagCols = {start: 5, lth: 1};
+    const qflagCols = {start: 6, lth: 1};
+    const sflagCols = {start: 7, lth: 1};
+    const totalFieldsLth = sflagCols.start + sflagCols.lth;
+
+    const dailyObsStartCol = 21;
+    console.log('made it here');
+    for (let dayOfMonth = 0; dayOfMonth < 31; dayOfMonth += 1) {
+      console.log('iteration: ', dayOfMonth);
+
+      const valueStart = dailyObsStartCol + (dayOfMonth * totalFieldsLth);
+      const mflagStart = valueStart + mflagCols.start;
+      const qflagStart = valueStart + qflagCols.start;
+      const sflagStart = valueStart + sflagCols.start;
+
+      const dailyWeather = {
+        country_code: fileContents.slice(0, 2),
+        network_code: fileContents.slice(2, 3),
+        station_id: fileContents.slice(3, 11),
+        year: fileContents.slice(11, 15),
+        month: fileContents.slice(15, 17),
+        element_type: fileContents.slice(17, 21),
+        measurement_flag: fileContents.slice(mflagStart, mflagStart + mflagCols.lth),
+        quality_flag: fileContents.slice(qflagStart, qflagStart + qflagCols.lth),
+        source_flag: fileContents.slice(sflagStart, sflagStart + sflagCols.lth),
+        measurement_value: fileContents.slice(valueStart, valueStart + valueCols.lth)
+      };
+      console.log('dailyWeather: ', dailyWeather);
+    }
+  }
+  catch(error) {
+    throw new Error(`Error inserting new DailyWeather document. Error: ${error}`);
   }
 
   // If successfully added to the staging database update its checkpoint

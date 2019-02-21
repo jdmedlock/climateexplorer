@@ -52,7 +52,10 @@ Climate Explorer uses MongoDB as an intermediate staging area for the ingestion
 and cleansing of data prior to adding it to the Postgres database. Due to this
 dependency this application requires a running instance of a MongoDB database.
 For example, on MacOS MongoDB is started by opening a new terminal window and
-entering the command `mongodb`.
+entering the command `mongodb --replSet rs0`.
+
+Since the ETL process relies on MongoDB transactions the instance that supports
+our test environment is a single-node replica set.
 
 The steps required to install MongoDB are be found [here](https://docs.mongodb.com/manual/installation/).
 

@@ -16,7 +16,7 @@ MongoDB Compass.
 ## Starting MongoDB
 
 1. Open a terminal session
-2. Enter the command: `mongod`
+2. Enter the command: `mongod --replSet rs0`
 
 ## Starting PostgreSQL
 
