@@ -10,8 +10,15 @@ class FTPAPI {
     this.ftpClient = null;
   }
 
+  /**
+   * Establish a connection to the FTP server
+   * @returns {Promise} Resolves to the greeting message from the FTP server
+   * @memberof FTPAPI
+   */
   async connect() {
     console.log('Attempting to connect to FTP host...');
+    // Return a promise to allow async/await to function as expected since
+    // functions in the `promise-ftp` package return Bluebird promises
     return new Promise((resolve, reject) => {
       this.ftpClient = new FTPClient();
       this.ftpClient.connect( {
@@ -27,8 +34,17 @@ class FTPAPI {
     });
   }
 
+  /**
+   * Terminate the connection to the FTP server
+   * @returns {Promise} Resolves to `false` if successful. If unsuccessful, 
+   * resolves to the error message or `true` if the error message wasn't
+   * captured.
+   * @memberof FTPAPI
+   */
   async disconnect() {
     console.log('Attempting to disconnect from FTP host...');
+    // Return a promise to allow async/await to function as expected since
+    // functions in the `promise-ftp` package return Bluebird promises
     return new Promise((resolve, reject) => {
       this.ftpClient.end()
       .then((result) => {
@@ -39,10 +55,31 @@ class FTPAPI {
   }
 
   /**
+   * Change the working directory on FTP server. Note that an active FTP
+   * session must be created before invoking this function.
+   * @param {string} Path Fully qualified path to change to
+   * @returns {Promise} Resolves to the new current directory, if the server 
+   * replies with it in the response text; otherwise resolves to undefined.
+   * @memberof FTPAPI
+   */
+  async cd(path) {
+    console.log('Attempting to change directory on FTP host...');
+    // Return a promise to allow async/await to function as expected since
+    // functions in the `promise-ftp` package return Bluebird promises
+    return new Promise((resolve, reject) => {
+      this.ftpClient.cwd(path)
+      .then((result) => {
+        console.log('...cd result: ', result);
+        resolve(result);
+      });
+    });
+  }
+
+  /**
    * Retrieve a directory list from the FTP host
    * @param {string} directoryName Path to the directory
-   * @returns {[dirlist]} Array of directory objects. For example, each entry
-   * is formatted like:
+   * @returns {Promise} Resolves to an array of directory objects. Entries are
+   * formatted like:
    * @example
    *   { type: '-',
    *     name: 'AJ000037579.dly',
@@ -59,10 +96,11 @@ class FTPAPI {
    */
   async getDirectory(directoryName) {
     let fileList;
+    // Return a promise to allow async/await to function as expected since
+    // functions in the `promise-ftp` package return Bluebird promises
     return new Promise((resolve, reject) => {
       this.connect()
       .then((result) => {
-        console.log('Getting directory list...');
         return this.ftpClient.list(directoryName);
       })
       .then((directoryList) => {
@@ -78,30 +116,28 @@ class FTPAPI {
   /**
     * Retrieve a file from the FTP host
     * @param {string} fileName
-    * @returns {object} Contents of the file
+    * @returns {Promise} Resolves to a string containing the file contents
     * @memberof FTPAPI
     */
   async getFile(fileName) {
     console.log('getFile - fileName: ', fileName);
+    // Return a promise to allow async/await to function as expected since
+    // functions in the `promise-ftp` package return Bluebird promises
     return new Promise((resolve, reject) => {
       this.connect()
       .then((result) => {
-        console.log('connect result before get. result: ', result);
         return this.ftpClient.get(fileName);
       })
       .then((stream) => {
-        console.log('Stream returned');    
         return new Promise((resolve, reject) => {
-          let fileContents = '';
           stream.on('readable', () => {
+            let allChunks = '';
             let chunk;
             while (null !== (chunk = stream.read())) {
-              fileContents += chunk;
+              allChunks += chunk;
             }
+            resolve(allChunks);
           });
-          stream.on('end', () => {
-            resolve(fileContents);
-          })
         })
         .then((fileContents) => {
           resolve(fileContents);
@@ -109,7 +145,7 @@ class FTPAPI {
         })
         .then((result) => {
           console.log('getFile - Successful');
-        })
+        });
       });
     });
   }

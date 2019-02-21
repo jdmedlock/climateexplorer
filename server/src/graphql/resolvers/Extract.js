@@ -71,8 +71,8 @@ const extract = async (_, __, { dataSources }) => {
   // Retrieve the file using FTP, and add it to the staging database.
   const fileContents = await dataSources.ftpSession.getFile(
     `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}/${fileNameToGet}`);
-    console.log('file retrieved. length: ', fileContents.length);
-    console.log('file contents: ', fileContents);
+  console.log('file retrieved. length: ', fileContents.length);
+  console.log('file contents: ', fileContents);
 
   // If successfully added to the staging database update its checkpoint
   // with the extract complete flag enabled
