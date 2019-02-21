@@ -86,13 +86,26 @@ const extract = async (_, __, { dataSources }) => {
 
   const observations = fileContents.slice(21, 269);
   // Daily observation field ranges following `slice` bounds rules
-  const valueCols = {start: 0, end: 5};
-  const mflagCols = {start: 5, end: 6};
-  const qflagCols = {start: 6, end: 7};
-  const sflagCols = {start: 7, end: 8};
+  const valueCols = {start: 0, end: 5, lth: 5};
+  const mflagCols = {start: 5, end: 6, lth: 1};
+  const qflagCols = {start: 6, end: 7, lth: 1};
+  const sflagCols = {start: 7, end: 8, lth: 1};
+  const totalFieldsLth = sflagCols.end;
 
   const dailyObsStartCol = 21;
+  console.log('made it here');
   for (let dayOfMonth = 0; dayOfMonth < 31; dayOfMonth += 1) {
+    console.log('iteration: ', dayOfMonth);
+
+    const valueStart = dailyObsStartCol + (dayOfMonth * totalFieldsLth);
+    const valueEnd = valueStart + valueCols.lth;
+    const mflagStart = valueStart + mflagCols.start;
+    const mflagEnd = mflagStart + mflagCols.lth;
+    const qflagStart = valueStart + qflagCols.start;
+    const qflagEnd = qflagStart + qflagCols.lth;
+    const sflagStart = valueStart + sflagCols.start;
+    const sflagEnd = sflagStart + sflagCols.lth;
+
     const dailyWeather = {
       country_code: fileContents.slice(0, 2),
       network_code: fileContents.slice(2, 3),
@@ -100,18 +113,10 @@ const extract = async (_, __, { dataSources }) => {
       year: fileContents.slice(11, 15),
       month: fileContents.slice(15, 17),
       element_type: fileContents.slice(17, 21),
-      measurement_flag: fileContents.slice(
-        dailyObsStartCol + (dayOfMonth*mflagCols.start),
-        dailyObsStartCol + (dayOfMonth*mglagCols.end) ),
-      quality_flag: fileContents.slice(
-        dailyObsStartCol + (dayOfMonth*qflagCols.start),
-        dailyObsStartCol + (dayOfMonth*qflagCols.end) ),
-      source_flag: fileContents.slice(
-        dailyObsStartCol + (dayOfMonth*sflagCols.start),
-        dailyObsStartCol + (dayOfMonth*sflagCols.end) ),
-      measurement_value: fileContents.slice(
-        dailyObsStartCol + (dayOfMonth*valueCols.start),
-        dailyObsStartCol + (dayOfMonth*valueCols.end) )
+      measurement_flag: fileContents.slice(mflagStart, mflagEnd),
+      quality_flag: fileContents.slice(qflagStart, qflagEnd),
+      source_flag: fileContents.slice(sflagStart, sflagEnd),
+      measurement_value: fileContents.slice(valueStart, valueEnd)
     };
     console.log('dailyWeather: ', dailyWeather);
   }
