@@ -16,7 +16,7 @@ class MongoAPI {
    */
   async connect() {
     // Return immediately if a connection has already been established.
-    if (this.client) {
+    if (this.client !== null) {
       console.log('connect - client already connected ');
       return;
     }
@@ -85,7 +85,7 @@ class MongoAPI {
    * @memberof MongoAPI
    */
   async findOne(collectionName, query) {
-    this.connect();
+    await this.connect();
     const document = await this.db.collection(collectionName).findOne(query);
     return document;
   }
@@ -98,7 +98,7 @@ class MongoAPI {
    * @memberof MongoAPI
    */
   async insertOne(collectionName, document) {
-    //this.connect();
+    await this.connect();
     const result = await this.db.collection(collectionName).insertOne(document);
     const insertResult = {
       status: result.result.ok === 1 ? 'successful' : 'failed',
@@ -108,6 +108,25 @@ class MongoAPI {
       name: result.ops[0].name
     };
     return insertResult;
+  }
+
+  /**
+   * Update an existing document in a collection.
+   * @param {String} collectionName Collection name
+   * @param {Object} filter Filters defining the document to update
+   * @param {Object} setObject Fields to update
+   * @returns Result of the update
+   * @memberof MongoAPI
+   */
+  async updateOne(collectionName, filter, setObject) {
+    await this.connect();
+    const result = await this.db.collection(collectionName).updateOne(filter, setObject, { upsert: false });
+    const updateResult = {
+      status: result.result.ok === 1 ? 'successful' : 'failed',
+      documentCount: result.nModified,
+      id: result.electionId
+    };
+    return updateResult;
   }
 
 }

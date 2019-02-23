@@ -32,6 +32,7 @@ const extract = async (_, __, { dataSources }) => {
   // Read the most recent entry from the checkpoint that was started, but 
   // for which extraction wasn't completed. Restart from this point.
   const mongo = new MongoAPI();
+  let mongoResult;
   const mostRecentChkpt = await mongo.findMax(
     'Checkpoint',
     { modificationYear: -1, modificationMonth: -1, modificationDay: -1 },
@@ -40,6 +41,7 @@ const extract = async (_, __, { dataSources }) => {
   console.log('Most recent checkpoint - mostRecentChkpt: ', mostRecentChkpt);
 
   let fileNameToGet = '';
+  let checkpointDate;
   if (!mostRecentChkpt) {
     // Search the directory list for the oldest file that remains to be extracted.
     // This is the first file for which there's no matching checkpoint.
@@ -50,7 +52,8 @@ const extract = async (_, __, { dataSources }) => {
       );
       if (!checkpointDocument) {
         // If there are no checkpoints start with the oldest file
-        const checkpointDate = entry.date;
+        checkpointDate = entry.date;
+        fileNameToGet = entry.name;
         const checkpointDocument = {
           fileName: entry.name,
           modificationYear: checkpointDate.getFullYear(),
@@ -58,9 +61,8 @@ const extract = async (_, __, { dataSources }) => {
           modificationDay: checkpointDate.getDate(),
           etlState: "STARTED"
         };
-        const insertResult = await mongo.insertOne('Checkpoint', checkpointDocument);
-        console.log('Checkpoint insert result: ', insertResult);
-        fileNameToGet = entry.name;
+        mongoResult = await mongo.insertOne('Checkpoint', checkpointDocument);
+        console.log('Checkpoint insert result: ', mongoResult);
         break;
       }
     }
@@ -74,26 +76,27 @@ const extract = async (_, __, { dataSources }) => {
   console.log('file retrieved. length: ', fileContents.length);
   console.log('file contents: ', fileContents);
 
+  const observation = {
+    country_code: fileContents.slice(0, 2),
+    network_code: fileContents.slice(2, 3),
+    station_id: fileContents.slice(3, 11),
+    year: parseInt(fileContents.slice(11, 15)),
+    month: parseInt(fileContents.slice(15, 17)),
+    element_type: fileContents.slice(17, 21)
+  };
+  console.log('observation: ', observation);
   try {
-    const observation = {
-      country_code: fileContents.slice(0, 2),
-      network_code: fileContents.slice(2, 3),
-      station_id: fileContents.slice(3, 11),
-      year: fileContents.slice(11, 15),
-      month: fileContents.slice(15, 17),
-      element_type: fileContents.slice(17, 21)
-    };
-    console.log('observation: ', observation);
-    const insertResult = await mongo.insertOne('Observation', observation);
-    console.log('Observation insert result: ', insertResult);
+    mongoResult = await mongo.insertOne('Observation', observation);
+    console.log('Observation insert result: ', mongoResult);
   } 
   catch(error) {
     throw new Error(`Error inserting new Observation document. Error: ${error}`);
   }
 
   try {
+    // Create a new DailyWeather document in MongoDB for each weather
+    // observation retrieved from NOAA
     const observations = fileContents.slice(21, 269);
-    // Daily observation field ranges following `slice` bounds rules
     const valueCols = {start: 0, lth: 5};
     const mflagCols = {start: 5, lth: 1};
     const qflagCols = {start: 6, lth: 1};
@@ -101,7 +104,6 @@ const extract = async (_, __, { dataSources }) => {
     const totalFieldsLth = sflagCols.start + sflagCols.lth;
 
     const dailyObsStartCol = 21;
-    console.log('made it here');
     for (let dayOfMonth = 0; dayOfMonth < 31; dayOfMonth += 1) {
       console.log('iteration: ', dayOfMonth);
 
@@ -114,15 +116,18 @@ const extract = async (_, __, { dataSources }) => {
         country_code: fileContents.slice(0, 2),
         network_code: fileContents.slice(2, 3),
         station_id: fileContents.slice(3, 11),
-        year: fileContents.slice(11, 15),
-        month: fileContents.slice(15, 17),
+        year: parseInt(fileContents.slice(11, 15)),
+        month: parseInt(fileContents.slice(15, 17)),
+        day: parseInt(dayOfMonth+1),
         element_type: fileContents.slice(17, 21),
         measurement_flag: fileContents.slice(mflagStart, mflagStart + mflagCols.lth),
         quality_flag: fileContents.slice(qflagStart, qflagStart + qflagCols.lth),
         source_flag: fileContents.slice(sflagStart, sflagStart + sflagCols.lth),
-        measurement_value: fileContents.slice(valueStart, valueStart + valueCols.lth)
+        measurement_value: parseInt(fileContents.slice(valueStart, valueStart + valueCols.lth))
       };
       console.log('dailyWeather: ', dailyWeather);
+      mongoResult = await mongo.insertOne('DailyWeather', dailyWeather);
+      console.log('DailyWeather insert result: ', mongoResult);
     }
   }
   catch(error) {
@@ -131,9 +136,20 @@ const extract = async (_, __, { dataSources }) => {
 
   // If successfully added to the staging database update its checkpoint
   // with the extract complete flag enabled
+  console.log('before checkpoint update');
+  console.log(`...fileNameToGet: ${fileNameToGet} fileDate: ${checkpointDate}`);
+  const checkpointFilter = {
+    fileName: fileNameToGet,
+    modificationYear: checkpointDate.getFullYear(),
+    modificationMonth: checkpointDate.getMonth(),
+    modificationDay: checkpointDate.getDate()
+  }
+  console.log('...checkpointFilter: ', checkpointFilter);
+  mongoResult = await mongo.updateOne('Checkpoint', checkpointFilter, 
+  { $set: { etlState : "EXTRACTED" } });
+  console.log('Checkpoint update result: ', mongoResult);
 
   await mongo.disconnect();
-
   return true;
 };
 
