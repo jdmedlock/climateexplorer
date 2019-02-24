@@ -68,6 +68,7 @@ const extract = async (_, __, { dataSources }) => {
     }
   } else {
     fileNameToGet = mostRecentChkpt.fileName;
+    console.log('checkpointDate: ', checkpointDate);
   }
 
   // Retrieve the file using FTP, and add it to the staging database.
@@ -137,7 +138,7 @@ const extract = async (_, __, { dataSources }) => {
   // If successfully added to the staging database update its checkpoint
   // with the extract complete flag enabled
   console.log('before checkpoint update');
-  console.log(`...fileNameToGet: ${fileNameToGet} fileDate: ${checkpointDate}`);
+  console.log(`...fileNameToGet: ${fileNameToGet} checkpointDate: ${checkpointDate}`);
   const checkpointFilter = {
     fileName: fileNameToGet,
     modificationYear: checkpointDate.getFullYear(),

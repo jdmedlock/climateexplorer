@@ -123,8 +123,8 @@ class MongoAPI {
     const result = await this.db.collection(collectionName).updateOne(filter, setObject, { upsert: false });
     const updateResult = {
       status: result.result.ok === 1 ? 'successful' : 'failed',
-      documentCount: result.nModified,
-      id: result.electionId
+      documentCount: result.result.nModified,
+      id: result.result.electionId
     };
     return updateResult;
   }
