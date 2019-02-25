@@ -5,20 +5,18 @@ import MongoAPI from '../../middleware/MongoAPI';
 // GraphQL Mutation Functions
 // -----
 
-const extract = async (_, __, { dataSources }) => {
-  // Retrieve the list of observation file names along with the date they were
-  // last modified
-  const directoryList = await dataSources.ftpSession.getDirectory(
-    `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}`);
-  console.log('directoryList: ', directoryList[0]); // List the first entry
-  console.log('...no. entries retrieved: ', directoryList.length);
-  
-  // Sort the file name list in ascending sequence based on the modification date
-  // so the oldest entries occur first.
+/**
+ * Sort the file name list in ascending sequence based on the modification date
+ * so the oldest entries occur first.
+ * @param {[Object]} directoryList Array of directory entry objects
+ */
+const sortDirectoryList = (directoryList) => {
+  console.log('entered sortDirectoryList');
+  const A_LT_B = -1;
+  const A_EQ_B = 0;
+  const A_GT_B = 1;
+
   directoryList.sort((a, b) => {
-    const A_LT_B = -1;
-    const A_EQ_B = 0;
-    const A_GT_B = 1;
     if ( a.date < b.date ) {
       return A_LT_B;
     }
@@ -27,17 +25,63 @@ const extract = async (_, __, { dataSources }) => {
     }
     return A_EQ_B;
   });
-  console.log('directoryList after sorting: ', directoryList[0]); // List the first entry
-
-  // Read the most recent entry from the checkpoint that was started, but 
-  // for which extraction wasn't completed. Restart from this point.
-  const mongo = new MongoAPI();
+}
+/**
+ * Read the most recent entry from the checkpoint that was started, but 
+ * for which extraction wasn't completed. Restart from this point.
+ * @returns {Object} Most recent checkpoint document
+ */
+const getMostRecentCheckpoint = async (mongo) => {
   let mongoResult;
   const mostRecentChkpt = await mongo.findMax(
     'Checkpoint',
     { modificationYear: -1, modificationMonth: -1, modificationDay: -1 },
     { etlState: "STARTED" }
   );
+  return mostRecentChkpt;
+}
+
+/**
+ * Update the ETL state in the specified Checkpoint document.
+ * @param {string} fileName File name identifying the checkpoint
+ * @param {Date} date Date identifying the checkpoint
+ * @param {string} newStatus New status to assign to the Checkpoint
+ * @returns {Object} Mongo update result
+ */
+const updateCheckpointState = async (mongo, fileName, date, newStatus) => {
+  const checkpointFilter = {
+    fileName: fileName,
+    modificationYear: date.getFullYear(),
+    modificationMonth: date.getMonth(),
+    modificationDay: date.getDate()
+  }
+  console.log('...checkpointFilter: ', checkpointFilter);
+  mongoResult = await mongo.updateOne('Checkpoint', checkpointFilter, 
+  { $set: { etlState : newStatus } });
+  return mongoResult;
+}
+
+/**
+ * Extract weather observations from the NOAA site
+ * @param {*} _
+ * @param {*} __
+ * @param {*} { dataSources }
+ * @returns null
+ */
+const extract = async (_, __, { dataSources }) => {
+  const mongo = new MongoAPI();
+
+  // Retrieve the list of observation file names along with the date they were
+  // last modified
+  const directoryList = await dataSources.ftpSession.getDirectory(
+    `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}`);
+  console.log('directoryList: ', directoryList[0]); // List the first entry
+  console.log('...no. entries retrieved: ', directoryList.length);
+
+  sortDirectoryList(directoryList);
+  console.log('directoryList after sorting: ', directoryList[0]); // List the first entry
+
+  const mostRecentChkpt = getMostRecentCheckpoint(mongo);
   console.log('Most recent checkpoint - mostRecentChkpt: ', mostRecentChkpt);
 
   let fileNameToGet = '';
@@ -61,7 +105,7 @@ const extract = async (_, __, { dataSources }) => {
           modificationDay: checkpointDate.getDate(),
           etlState: "STARTED"
         };
-        mongoResult = await mongo.insertOne('Checkpoint', checkpointDocument);
+        const mongoResult = await mongo.insertOne('Checkpoint', checkpointDocument);
         console.log('Checkpoint insert result: ', mongoResult);
         break;
       }
@@ -87,7 +131,7 @@ const extract = async (_, __, { dataSources }) => {
   };
   console.log('observation: ', observation);
   try {
-    mongoResult = await mongo.insertOne('Observation', observation);
+    const mongoResult = await mongo.insertOne('Observation', observation);
     console.log('Observation insert result: ', mongoResult);
   } 
   catch(error) {
@@ -127,7 +171,7 @@ const extract = async (_, __, { dataSources }) => {
         measurement_value: parseInt(fileContents.slice(valueStart, valueStart + valueCols.lth))
       };
       console.log('dailyWeather: ', dailyWeather);
-      mongoResult = await mongo.insertOne('DailyWeather', dailyWeather);
+      const mongoResult = await mongo.insertOne('DailyWeather', dailyWeather);
       console.log('DailyWeather insert result: ', mongoResult);
     }
   }
@@ -139,18 +183,11 @@ const extract = async (_, __, { dataSources }) => {
   // with the extract complete flag enabled
   console.log('before checkpoint update');
   console.log(`...fileNameToGet: ${fileNameToGet} checkpointDate: ${checkpointDate}`);
-  const checkpointFilter = {
-    fileName: fileNameToGet,
-    modificationYear: checkpointDate.getFullYear(),
-    modificationMonth: checkpointDate.getMonth(),
-    modificationDay: checkpointDate.getDate()
-  }
-  console.log('...checkpointFilter: ', checkpointFilter);
-  mongoResult = await mongo.updateOne('Checkpoint', checkpointFilter, 
-  { $set: { etlState : "EXTRACTED" } });
+  const mongoResult = updateCheckpointState(mongo, fileNameToGet, checkpointDate, "EXTRACTED");
   console.log('Checkpoint update result: ', mongoResult);
 
   await mongo.disconnect();
+  await dataSources.ftpSession.disconnect();
   return true;
 };
 
