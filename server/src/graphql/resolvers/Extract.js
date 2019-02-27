@@ -26,9 +26,11 @@ const sortDirectoryList = (directoryList) => {
     return A_EQ_B;
   });
 }
+
 /**
  * Read the most recent entry from the checkpoint that was started, but 
  * for which extraction wasn't completed. Restart from this point.
+ * @param {object} mongo Mongo API instance
  * @returns {Object} Most recent checkpoint document
  */
 const getMostRecentCheckpoint = async (mongo) => {
@@ -40,52 +42,19 @@ const getMostRecentCheckpoint = async (mongo) => {
   );
   return mostRecentChkpt;
 }
-
 /**
- * Update the ETL state in the specified Checkpoint document.
- * @param {string} fileName File name identifying the checkpoint
- * @param {Date} date Date identifying the checkpoint
- * @param {string} newStatus New status to assign to the Checkpoint
- * @returns {Object} Mongo update result
+ * Start extracting the next available file of weather observations. Always
+ * start with the last unfinished file, otherwise select the next available
+ * file.
+ * @param {object} mongo Mongo API instance
+ * @param {[object]} directoryList 
+ * @returns {Object} fileNameToGet, checkpointDate, mostRecentChkpt
  */
-const updateCheckpointState = async (mongo, fileName, date, newStatus) => {
-  const checkpointFilter = {
-    fileName: fileName,
-    modificationYear: date.getFullYear(),
-    modificationMonth: date.getMonth(),
-    modificationDay: date.getDate()
-  }
-  console.log('...checkpointFilter: ', checkpointFilter);
-  mongoResult = await mongo.updateOne('Checkpoint', checkpointFilter, 
-  { $set: { etlState : newStatus } });
-  return mongoResult;
-}
-
-/**
- * Extract weather observations from the NOAA site
- * @param {*} _
- * @param {*} __
- * @param {*} { dataSources }
- * @returns null
- */
-const extract = async (_, __, { dataSources }) => {
-  const mongo = new MongoAPI();
-
-  // Retrieve the list of observation file names along with the date they were
-  // last modified
-  const directoryList = await dataSources.ftpSession.getDirectory(
-    `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}`);
-  console.log('directoryList: ', directoryList[0]); // List the first entry
-  console.log('...no. entries retrieved: ', directoryList.length);
-
-  sortDirectoryList(directoryList);
-  console.log('directoryList after sorting: ', directoryList[0]); // List the first entry
-
-  const mostRecentChkpt = getMostRecentCheckpoint(mongo);
-  console.log('Most recent checkpoint - mostRecentChkpt: ', mostRecentChkpt);
-
+const getNextCheckpoint = async(mongo, directoryList) => {
   let fileNameToGet = '';
   let checkpointDate;
+  const mostRecentChkpt = await getMostRecentCheckpoint(mongo);
+  console.log('Most recent checkpoint - mostRecentChkpt: ', mostRecentChkpt);
   if (!mostRecentChkpt) {
     // Search the directory list for the oldest file that remains to be extracted.
     // This is the first file for which there's no matching checkpoint.
@@ -114,13 +83,36 @@ const extract = async (_, __, { dataSources }) => {
     fileNameToGet = mostRecentChkpt.fileName;
     console.log('checkpointDate: ', checkpointDate);
   }
+  return { fileNameToGet, checkpointDate, mostRecentChkpt}
+}
 
-  // Retrieve the file using FTP, and add it to the staging database.
-  const fileContents = await dataSources.ftpSession.getFile(
-    `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}/${fileNameToGet}`);
-  console.log('file retrieved. length: ', fileContents.length);
-  console.log('file contents: ', fileContents);
-
+/**
+ * Update the ETL state in the specified Checkpoint document.
+ * @param {string} fileName File name identifying the checkpoint
+ * @param {Date} date Date identifying the checkpoint
+ * @param {string} newStatus New status to assign to the Checkpoint
+ * @returns {Object} Mongo update result
+ */
+const updateCheckpointState = async (mongo, fileName, date, newStatus) => {
+  const checkpointFilter = {
+    fileName: fileName,
+    modificationYear: date.getFullYear(),
+    modificationMonth: date.getMonth(),
+    modificationDay: date.getDate()
+  }
+  console.log('...checkpointFilter: ', checkpointFilter);
+  const mongoResult = await mongo.updateOne('Checkpoint', checkpointFilter, 
+  { $set: { etlState : newStatus } });
+  return mongoResult;
+}
+/**
+ * Create an Observation document in the staging area
+ * @param {object} mongo Mongo API instance
+ * @param {object} fileContents Contents of the daily weather observation file
+ * @returns {object} Daily weather observation document if successful, otherwise
+ * an error is thrown
+ */
+const createObservation = async (mongo, fileContents) => {
   const observation = {
     country_code: fileContents.slice(0, 2),
     network_code: fileContents.slice(2, 3),
@@ -133,11 +125,19 @@ const extract = async (_, __, { dataSources }) => {
   try {
     const mongoResult = await mongo.insertOne('Observation', observation);
     console.log('Observation insert result: ', mongoResult);
+    return observation;
   } 
   catch(error) {
     throw new Error(`Error inserting new Observation document. Error: ${error}`);
   }
-
+}
+/**
+ * Create a DailyWeather document in the staging area for each day in the
+ * observation record
+ * @param {object} mongo Mongo API instance
+ * @param {object} fileContents Contents of the daily weather observation file
+ */
+const createDailyObservations = async (mongo, fileContents) => {
   try {
     // Create a new DailyWeather document in MongoDB for each weather
     // observation retrieved from NOAA
@@ -170,7 +170,6 @@ const extract = async (_, __, { dataSources }) => {
         source_flag: fileContents.slice(sflagStart, sflagStart + sflagCols.lth),
         measurement_value: parseInt(fileContents.slice(valueStart, valueStart + valueCols.lth))
       };
-      console.log('dailyWeather: ', dailyWeather);
       const mongoResult = await mongo.insertOne('DailyWeather', dailyWeather);
       console.log('DailyWeather insert result: ', mongoResult);
     }
@@ -178,13 +177,38 @@ const extract = async (_, __, { dataSources }) => {
   catch(error) {
     throw new Error(`Error inserting new DailyWeather document. Error: ${error}`);
   }
+}
 
-  // If successfully added to the staging database update its checkpoint
-  // with the extract complete flag enabled
-  console.log('before checkpoint update');
-  console.log(`...fileNameToGet: ${fileNameToGet} checkpointDate: ${checkpointDate}`);
-  const mongoResult = updateCheckpointState(mongo, fileNameToGet, checkpointDate, "EXTRACTED");
-  console.log('Checkpoint update result: ', mongoResult);
+
+/**
+ * Extract weather observations from the NOAA site
+ * @param {*} _
+ * @param {*} __
+ * @param {*} { dataSources }
+ * @returns {Boolean} `true` if successful, otherwise `false`
+ */
+const extract = async (_, __, { dataSources }) => {
+  const mongo = new MongoAPI();
+
+  // Retrieve the list of observation file names and sort in ascending order 
+  // by file date
+  const directoryList = await dataSources.ftpSession.getDirectory(
+    `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}`);
+  sortDirectoryList(directoryList);
+
+  // Create the new checkpoint, retrieve the file using FTP, and add it to 
+  // the staging database.
+  for (let i = 0; i < process.env.EXTRACT_FILES_PER_PASS; i += 1) {
+    const {fileNameToGet, checkpointDate, mostRecentChkpt} = await getNextCheckpoint(mongo, directoryList);
+    const fileContents = await dataSources.ftpSession.getFile(
+      `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}/${fileNameToGet}`);
+    const observation = createObservation(mongo, fileContents);
+    await createDailyObservations(mongo, fileContents);
+
+    // If successfully added to the staging database, update its checkpoint
+    // with the extract complete flag enabled
+    const mongoResult = await updateCheckpointState(mongo, fileNameToGet, checkpointDate, "EXTRACTED");
+  }
 
   await mongo.disconnect();
   await dataSources.ftpSession.disconnect();
