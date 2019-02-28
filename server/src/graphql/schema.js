@@ -5,7 +5,6 @@ const typeDefs = gql`
   type Query {
     countries: [Country]
     me: User!
-    locations: [Location!]
     user (email: String!): User!
   }
 
@@ -20,11 +19,6 @@ const typeDefs = gql`
     no_errors: Int
   }
 
-  type Location {
-    id: Int
-    name: String
-  }
-
   type User {
     id: ID!
     name: String
@@ -32,6 +26,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
+    extract : Boolean,
     login (email: String!): String,
     logoff: Boolean,
     loadCountries: [Country]

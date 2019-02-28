@@ -8,7 +8,6 @@ class Country extends DataSource {
   constructor(mongoAPI) {
     super();
     this.mongoAPI = mongoAPI;
-
     this.context = null;
   }
 
@@ -22,6 +21,20 @@ class Country extends DataSource {
    */
   initialize(config) {
     this.context = config.context;
+  }
+
+  async getCountries(stream) {
+    let countries = '';
+    return new Promise(async (resolve, reject) => {
+      stream.on('readable', () => {
+        let data;
+        while (data = stream.read()) {
+          countries += data.toString();
+        }
+        resolve(countries);
+      })
+    })
+    .then( countries => countries );
   }
 
   /**
@@ -48,36 +61,13 @@ class Country extends DataSource {
    */
   async extractCountriesFromGhcnd() {
     const ftpSession = this.context.dataSources.ftpSession;
-    return new Promise(function (resolve, reject) {
-      ftpSession.connect()
-      .then(() => {
-        return ftpSession.getFile(
-          `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`
-        );
-      })  
-      .then(stream => {
-        let countries = '';
-        stream.on('readable', function() {
-          let data;
-          while (data = this.read()) {
-            countries += data.toString();
-          }
-          resolve(countries);
-          ftpSession.disconnect();
-        });
-      })
-      .catch(err => {
-        throw new Error('FTP from NOAA failed.')
-      });
-    })
-    .then(countries => {
-      const countriesObject = this.convertToObject(countries);
-      // process.env.NODE_ENV === 'production' ? null : console.log('extractCountriesFromGhcnd - countries: ', countriesJSON);
-      return countriesObject;
-    })
-    .catch(err => {
-      throw new Error('FTP from NOAA failed.');
-    });
+    await ftpSession.connect();
+    const stream = await ftpSession.getFile(
+        `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_COUNTIES_FILE}`
+    );
+    const countries = await this.getCountries(stream);
+    const countriesObject = this.convertToObject(countries);
+    return countriesObject;
   }
 
   /**
