@@ -26,7 +26,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    extract : Boolean,
+    extract: Boolean,
     login (email: String!): String,
     logoff: Boolean,
     loadCountries: [Country]

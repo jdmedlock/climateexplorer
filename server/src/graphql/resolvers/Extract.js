@@ -11,7 +11,6 @@ import MongoAPI from '../../middleware/MongoAPI';
  * @param {[Object]} directoryList Array of directory entry objects
  */
 const sortDirectoryList = (directoryList) => {
-  console.log('entered sortDirectoryList');
   const A_LT_B = -1;
   const A_EQ_B = 0;
   const A_GT_B = 1;
@@ -42,6 +41,7 @@ const getMostRecentCheckpoint = async (mongo) => {
   );
   return mostRecentChkpt;
 }
+
 /**
  * Start extracting the next available file of weather observations. Always
  * start with the last unfinished file, otherwise select the next available
@@ -54,7 +54,6 @@ const getNextCheckpoint = async(mongo, directoryList) => {
   let fileNameToGet = '';
   let checkpointDate;
   const mostRecentChkpt = await getMostRecentCheckpoint(mongo);
-  console.log('Most recent checkpoint - mostRecentChkpt: ', mostRecentChkpt);
   if (!mostRecentChkpt) {
     // Search the directory list for the oldest file that remains to be extracted.
     // This is the first file for which there's no matching checkpoint.
@@ -75,13 +74,11 @@ const getNextCheckpoint = async(mongo, directoryList) => {
           etlState: "STARTED"
         };
         const mongoResult = await mongo.insertOne('Checkpoint', checkpointDocument);
-        console.log('Checkpoint insert result: ', mongoResult);
         break;
       }
     }
   } else {
     fileNameToGet = mostRecentChkpt.fileName;
-    console.log('checkpointDate: ', checkpointDate);
   }
   return { fileNameToGet, checkpointDate, mostRecentChkpt}
 }
@@ -100,11 +97,11 @@ const updateCheckpointState = async (mongo, fileName, date, newStatus) => {
     modificationMonth: date.getMonth(),
     modificationDay: date.getDate()
   }
-  console.log('...checkpointFilter: ', checkpointFilter);
   const mongoResult = await mongo.updateOne('Checkpoint', checkpointFilter, 
   { $set: { etlState : newStatus } });
   return mongoResult;
 }
+
 /**
  * Create an Observation document in the staging area
  * @param {object} mongo Mongo API instance
@@ -121,16 +118,15 @@ const createObservation = async (mongo, fileContents) => {
     month: parseInt(fileContents.slice(15, 17)),
     element_type: fileContents.slice(17, 21)
   };
-  console.log('observation: ', observation);
   try {
     const mongoResult = await mongo.insertOne('Observation', observation);
-    console.log('Observation insert result: ', mongoResult);
     return observation;
   } 
   catch(error) {
     throw new Error(`Error inserting new Observation document. Error: ${error}`);
   }
 }
+
 /**
  * Create a DailyWeather document in the staging area for each day in the
  * observation record
@@ -150,8 +146,6 @@ const createDailyObservations = async (mongo, fileContents) => {
 
     const dailyObsStartCol = 21;
     for (let dayOfMonth = 0; dayOfMonth < 31; dayOfMonth += 1) {
-      console.log('iteration: ', dayOfMonth);
-
       const valueStart = dailyObsStartCol + (dayOfMonth * totalFieldsLth);
       const mflagStart = valueStart + mflagCols.start;
       const qflagStart = valueStart + qflagCols.start;
@@ -171,7 +165,6 @@ const createDailyObservations = async (mongo, fileContents) => {
         measurement_value: parseInt(fileContents.slice(valueStart, valueStart + valueCols.lth))
       };
       const mongoResult = await mongo.insertOne('DailyWeather', dailyWeather);
-      console.log('DailyWeather insert result: ', mongoResult);
     }
   }
   catch(error) {
@@ -179,39 +172,56 @@ const createDailyObservations = async (mongo, fileContents) => {
   }
 }
 
-
 /**
  * Extract weather observations from the NOAA site
- * @param {*} _
- * @param {*} __
+ * @param {*} _ data
+ * @param {*} __ args
  * @param {*} { dataSources }
+ * @param {*} info
  * @returns {Boolean} `true` if successful, otherwise `false`
  */
-const extract = async (_, __, { dataSources }) => {
+const extract = async (_, __, { dataSources }, info) => {
+  console.log('Extract starting!!!');
   const mongo = new MongoAPI();
 
   // Retrieve the list of observation file names and sort in ascending order 
   // by file date
-  const directoryList = await dataSources.ftpSession.getDirectory(
-    `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}`);
-  sortDirectoryList(directoryList);
+  let directoryList;
+  try {
+    await dataSources.ftpSession.connect();
+    directoryList = await dataSources.ftpSession.getDirectory(
+      `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}`);
+    sortDirectoryList(directoryList);
+    await dataSources.ftpSession.disconnect();
+  }
+  catch(error) {
+    console.log('extract - Direcory retrieval error: ', error);
+    return false;
+  }
 
   // Create the new checkpoint, retrieve the file using FTP, and add it to 
   // the staging database.
-  for (let i = 0; i < process.env.EXTRACT_FILES_PER_PASS; i += 1) {
-    const {fileNameToGet, checkpointDate, mostRecentChkpt} = await getNextCheckpoint(mongo, directoryList);
-    const fileContents = await dataSources.ftpSession.getFile(
-      `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}/${fileNameToGet}`);
-    const observation = createObservation(mongo, fileContents);
-    await createDailyObservations(mongo, fileContents);
+  try {
+    await dataSources.ftpSession.connect();
+    for (let i = 0; i < process.env.EXTRACT_FILES_PER_PASS; i += 1) {
+      const {fileNameToGet, checkpointDate, mostRecentChkpt} = await getNextCheckpoint(mongo, directoryList);
+      const fileContents = await dataSources.ftpSession.getFile(
+        `${process.env.NOAA_FTP_GHCN_DIRECTORY}/${process.env.NOAA_FTP_DAILY_DIR}/${fileNameToGet}`);
+      const observation = await createObservation(mongo, fileContents);
+      await createDailyObservations(mongo, fileContents);
 
-    // If successfully added to the staging database, update its checkpoint
-    // with the extract complete flag enabled
-    const mongoResult = await updateCheckpointState(mongo, fileNameToGet, checkpointDate, "EXTRACTED");
+      // If successfully added to the staging database, update its checkpoint
+      // with the extract complete flag enabled
+      const mongoResult = await updateCheckpointState(mongo, fileNameToGet, checkpointDate, "EXTRACTED");
+    }
+    await dataSources.ftpSession.disconnect();
+    await mongo.disconnect();
   }
-
-  await mongo.disconnect();
-  await dataSources.ftpSession.disconnect();
+  catch(error) {
+    console.log('extract - File retrieval error: ', error);
+    return false;
+  }
+  
   return true;
 };
 

@@ -8,6 +8,7 @@ class FTPAPI {
     this.user = connectionOptions.user;
     this.password = connectionOptions.password;
     this.ftpClient = null;
+    this.greetingMessage = '';
   }
 
   /**
@@ -15,11 +16,14 @@ class FTPAPI {
    * @returns {Promise} Resolves to the greeting message from the FTP server
    * @memberof FTPAPI
    */
-  async connect() {
-    console.log('Attempting to connect to FTP host...');
+  connect() {
     // Return a promise to allow async/await to function as expected since
     // functions in the `promise-ftp` package return Bluebird promises
     return new Promise((resolve, reject) => {
+      if (this.ftpClient !== null) {
+        console.log('FTPAPI connect - connection already established: ', this.greetingMessage);
+        resolve(this.greetingMessage);
+      }
       this.ftpClient = new FTPClient();
       this.ftpClient.connect( {
         host: this.host_url,
@@ -28,9 +32,13 @@ class FTPAPI {
         password: this.password,
       })
       .then((result) => {
-        console.log('...connect result: ', result);
+        console.log('FTPAPI connect - connect result: ', result);
+        this.greetingMessage = result;
         resolve(result);
-      });
+      })
+      .catch((error) => {
+        throw new Error('FTPAPI connection failure. error: ', error);
+      })
     });
   }
 
@@ -41,7 +49,7 @@ class FTPAPI {
    * captured.
    * @memberof FTPAPI
    */
-  async disconnect() {
+  disconnect() {
     console.log('Attempting to disconnect from FTP host...');
     // Return a promise to allow async/await to function as expected since
     // functions in the `promise-ftp` package return Bluebird promises
@@ -49,8 +57,13 @@ class FTPAPI {
       this.ftpClient.end()
       .then((result) => {
         console.log('...disconnect result: ', result);
+        this.ftpClient = null;
+        this.greetingMessage = '';
         resolve(result);
-      });
+      })
+      .catch((error) => {
+        throw new Error('FTPAPI disconnect failure. error: ', error);
+      })
     });
   }
 
@@ -71,7 +84,10 @@ class FTPAPI {
       .then((result) => {
         console.log('...cd result: ', result);
         resolve(result);
-      });
+      })
+      .catch((error) => {
+        throw new Error('FTPAPI cd failure. error: ', error);
+      })
     });
   }
 
@@ -95,21 +111,18 @@ class FTPAPI {
    * @memberof FTPAPI
    */
   async getDirectory(directoryName) {
-    let fileList;
+    console.log(`FTPAPI getDirectory - directoryName: ${directoryName}`);
     // Return a promise to allow async/await to function as expected since
     // functions in the `promise-ftp` package return Bluebird promises
     return new Promise((resolve, reject) => {
-      this.connect()
-      .then((result) => {
-        return this.ftpClient.list(directoryName);
-      })
+      this.ftpClient.list(directoryName)
       .then((directoryList) => {
-        fileList = directoryList;
-        return this.disconnect();
+        console.log('point B');
+        resolve(directoryList);
       })
-      .then((result) => {
-        resolve(fileList);
-      });
+      .catch((error) => {
+        reject('FTPAPI getDirectory failure. error: ', error);
+      })
     });
   }
 
@@ -120,14 +133,11 @@ class FTPAPI {
     * @memberof FTPAPI
     */
   async getFile(fileName) {
-    console.log('getFile - fileName: ', fileName);
+    console.log(`FTPAPI getFile - fileName: ${fileName}`);
     // Return a promise to allow async/await to function as expected since
     // functions in the `promise-ftp` package return Bluebird promises
     return new Promise((resolve, reject) => {
-      this.connect()
-      .then((result) => {
-        return this.ftpClient.get(fileName);
-      })
+      return this.ftpClient.get(fileName)
       .then((stream) => {
         return new Promise((resolve, reject) => {
           stream.on('readable', () => {
@@ -141,12 +151,14 @@ class FTPAPI {
         })
         .then((fileContents) => {
           resolve(fileContents);
-          return this.disconnect();
         })
-        .then((result) => {
-          console.log('getFile - Successful');
-        });
-      });
+        .catch((error) => {
+          reject('FTPAPI getFile stream failure. error: ', error);
+        })
+      })
+      .catch((error) => {
+        reject('FTPAPI getFile retrieval failure. error: ', error);
+      })
     });
   }
 }

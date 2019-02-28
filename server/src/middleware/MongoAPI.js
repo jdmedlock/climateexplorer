@@ -1,4 +1,3 @@
-import { DataSource } from 'apollo-datasource';
 import { MongoClient } from 'mongodb';
 
 class MongoAPI {
@@ -17,7 +16,6 @@ class MongoAPI {
   async connect() {
     // Return immediately if a connection has already been established.
     if (this.client !== null) {
-      console.log('connect - client already connected ');
       return;
     }
 
@@ -28,9 +26,9 @@ class MongoAPI {
     try {
       await this.client.connect();
       this.db = await this.client.db(dbName);
-      console.log(`Connected to Mongodb! - ${process.env.MONGODB_URL}`);
+      console.log(`MongoAPI connec - Connected to Mongodb! ${process.env.MONGODB_URL}`);
     } catch (err) {
-      throw new Error('Unable to connect to MongoDB');
+      throw new Error('MongoAPI connec - Unable to connect to MongoDB');
     }
   };
 
@@ -128,7 +126,6 @@ class MongoAPI {
     };
     return updateResult;
   }
-
 }
 
 export default MongoAPI;
